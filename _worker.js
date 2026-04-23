@@ -38,6 +38,8 @@ const IMPACT_AREA_MAP = {
   admin: "Administración / back office",
   management: "Dirección / estrategia",
   product: "Producto / innovación",
+  finance: "Finanzas / control de gestión",
+  it_data: "IT / datos",
   unclear: "No lo tenemos claro aún",
 };
 
@@ -65,6 +67,8 @@ const AI_TOOL_MAP = {
   claude: "Claude",
   canva: "Canva / herramientas creativas con IA",
   automations: "Automatizaciones con IA",
+  notion: "Notion AI / asistentes internos",
+  crm_ai: "CRM o herramientas comerciales con IA",
   specific: "Otras herramientas específicas",
   none: "No usamos ninguna",
 };
@@ -78,16 +82,18 @@ const TASK_MAP = {
   sales_prospecting: "Prospección comercial / ventas",
   coordination: "Organización y coordinación interna",
   training_docs: "Formación / documentación interna",
+  email_meetings: "Emails, reuniones y seguimiento",
+  quality_review: "Revisión de calidad / control de errores",
   unclear: "No lo tenemos claro todavía",
 };
 
 const USAGE_MAP = {
-  "0_5": "0 - 5 horas / semana",
-  "5_10": "5 - 10 horas / semana",
-  "10_15": "10 - 15 horas / semana",
-  "15_25": "15 - 25 horas / semana",
-  "25_40": "25 - 40 horas / semana",
-  "40_plus": "Más de 40 horas / semana",
+  "0_5": "0 - 5 horas / empleado / semana",
+  "5_10": "5 - 10 horas / empleado / semana",
+  "10_15": "10 - 15 horas / empleado / semana",
+  "15_25": "15 - 20 horas / empleado / semana",
+  "20_30": "20 - 30 horas / empleado / semana",
+  "30_plus": "Más de 30 horas / empleado / semana",
 };
 
 const NEW_BLOCKER_MAP = {
@@ -98,6 +104,8 @@ const NEW_BLOCKER_MAP = {
   tools: "Dudas sobre herramientas",
   privacy: "Dudas sobre privacidad / seguridad",
   use_cases: "No vemos aún casos de uso claros",
+  data_quality: "Datos desordenados o poco accesibles",
+  process_clarity: "Procesos poco definidos",
   leadership: "Falta de apoyo interno / liderazgo",
   budget: "Presupuesto limitado",
 };
@@ -242,12 +250,12 @@ function calcMetrics(payload) {
   const chips = payload.chips || {};
   const contact = payload.contact || {};
   const situationScoreMap = { none: 14, individual: 28, pilots: 44, regular: 62, embedded: 76 };
-  const lostHoursScoreMap = { "0_5": 2, "5_10": 5, "10_15": 8, "15_25": 12, "25_40": 16, "40_plus": 18 };
-  const lostHoursMidMap = { "0_5": 2.5, "5_10": 7.5, "10_15": 12.5, "15_25": 20, "25_40": 32.5, "40_plus": 48 };
+  const lostHoursScoreMap = { "0_5": 2, "5_10": 5, "10_15": 8, "15_25": 11, "20_30": 14, "30_plus": 16 };
+  const lostHoursMidMap = { "0_5": 2.5, "5_10": 7.5, "10_15": 12.5, "15_25": 17.5, "20_30": 25, "30_plus": 32 };
   const userScoreMap = { nobody: 0, management: 4, few_people: 8, one_department: 12, several_departments: 18, company_wide: 24 };
   const situationHoursMap = { none: 4.2, individual: 3.4, pilots: 2.7, regular: 1.9, embedded: 1.25 };
   const aiSavingsMap = { none: 0.26, individual: 0.24, pilots: 0.21, regular: 0.17, embedded: 0.13 };
-  const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, unclear: 0.26 };
+  const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, finance: 0.22, it_data: 0.2, unclear: 0.26 };
 
   const parsedEmployees = Number(String(contact.employees || "").replace(/[^\d]/g, ""));
   const team = Math.max(1, Math.min(500, parsedEmployees || 12));
@@ -264,10 +272,11 @@ function calcMetrics(payload) {
   const impactedShare = areaCoverage[mainArea] || 0.3;
   const impactedTeam = Math.max(2, Math.min(team, Math.round(team * impactedShare)));
   const blockerFactor = 1 + Math.min(0.24, (blockerCount - 1) * 0.06);
-  const declaredWeeklyHours = lostHoursMidMap[a.usage];
-  const modeledWeeklyHours = (situationHoursMap[a.ai_situation] || 3.4) * impactedTeam * blockerFactor * (1 + (taskCount - 1) * 0.07);
-  const weeklyHours = declaredWeeklyHours || modeledWeeklyHours;
-  const hrs = weeklyHours / Math.max(1, impactedTeam);
+  const declaredWeeklyHoursPerEmployee = lostHoursMidMap[a.usage];
+  const modeledWeeklyHoursPerEmployee = (situationHoursMap[a.ai_situation] || 3.4) * blockerFactor * (1 + (taskCount - 1) * 0.07);
+  const weeklyHoursPerEmployee = Math.min(40, declaredWeeklyHoursPerEmployee || modeledWeeklyHoursPerEmployee);
+  const weeklyHoursTeam = weeklyHoursPerEmployee * impactedTeam;
+  const hrs = weeklyHoursPerEmployee;
   const scoreRaw =
     (situationScoreMap[a.ai_situation] || 28) +
     (lostHoursScoreMap[a.usage] || 0) +
@@ -277,12 +286,17 @@ function calcMetrics(payload) {
     (team > 40 ? 3 : 0) -
     (a.objective === "explore" ? 4 : 0);
   const score = Math.max(8, Math.min(92, Math.round(scoreRaw)));
-  const totalH = Math.round(weeklyHours * 48);
+  const totalH = Math.round(weeklyHoursPerEmployee * 48);
   const moneyL = Math.round(totalH * hourlyCost);
+  const totalHTeam = Math.round(weeklyHoursTeam * 48);
+  const moneyLTeam = Math.round(totalHTeam * hourlyCost);
   const saveRate = aiSavingsMap[a.ai_situation] || 0.24;
   const hSaved = Math.round(totalH * saveRate);
   const mSaved = Math.round(moneyL * saveRate);
-  const roi12m = Math.round(mSaved * 1.55);
+  const hSavedTeam = Math.round(totalHTeam * saveRate);
+  const mSavedTeam = Math.round(moneyLTeam * saveRate);
+  const roi12m = Math.round(mSaved * 1.35);
+  const roi12mTeam = Math.round(mSavedTeam * 1.35);
   const benchmark =
     score < 30
       ? { label: "Por debajo del punto de partida habitual", note: "Hace falta priorizar un primer caso de uso, ownership y una implantación guiada para capturar valor rápido." }
@@ -292,7 +306,7 @@ function calcMetrics(payload) {
           ? { label: "Por encima de la media", note: "La empresa ya muestra madurez real. El siguiente salto pasa por orquestación, reporting y extensión a más áreas." }
           : { label: "Madurez avanzada", note: "La siguiente capa ya no es descubrir la IA, sino gobernarla, medirla y escalarla con más control." };
 
-  return { team, impactedTeam, hrs: Math.round(hrs * 10) / 10, score, totalH, moneyL, hSaved, mSaved, hourlyCost, revenue, roi12m, saveRate, benchmark };
+  return { team, impactedTeam, hrs: Math.round(hrs * 10) / 10, score, totalH, moneyL, totalHTeam, moneyLTeam, hSaved, mSaved, hSavedTeam, mSavedTeam, hourlyCost, revenue, roi12m, roi12mTeam, saveRate, benchmark };
 }
 
 function serializePayload(payload, metrics) {
@@ -311,15 +325,16 @@ function serializePayload(payload, metrics) {
     `Quién usa IA: ${AI_USERS_MAP[a.ai_users] || "No indicado"}`,
     `Herramientas IA: ${(chips.ai_tools || []).map(item => AI_TOOL_MAP[item] || item).join(", ") || "No indicado"}`,
     `Tareas que consumen más tiempo: ${(chips.tasks || []).map(item => TASK_MAP[item] || item).join(", ") || "No indicado"}`,
-    `Horas semanales perdidas en tareas repetitivas automatizables: ${USAGE_MAP[a.usage] || "No indicado"}`,
+    `Horas semanales perdidas por empleado en tareas repetitivas automatizables: ${USAGE_MAP[a.usage] || "No indicado"}`,
     `Bloqueadores: ${(chips.blockers || []).map(item => NEW_BLOCKER_MAP[item] || item).join(", ") || "No indicado"}`,
     `Prioridad de arranque: ${PRIORITY_MAP[a.priority] || "No indicada"}`,
     `Resultado deseado en 90 días: ${payload.desiredOutcome || "No indicado"}`,
     `Score calculado: ${metrics.score}`,
     `Equipo impactado estimado: ${metrics.impactedTeam}`,
-    `Horas perdidas estimadas: ${metrics.totalH}`,
-    `Coste oculto anual estimado: EUR ${metrics.moneyL}`,
-    `Ahorro anual priorizable: EUR ${metrics.mSaved}`,
+    `Horas perdidas estimadas por empleado al año: ${metrics.totalH}`,
+    `Coste oculto anual estimado por empleado: EUR ${metrics.moneyL}`,
+    `Ahorro anual priorizable por empleado: EUR ${metrics.mSaved}`,
+    `Referencia interna de equipo impactado: ${metrics.impactedTeam} personas, ${metrics.totalHTeam} horas/año y EUR ${metrics.moneyLTeam} de coste anual agregado prudente`,
     payload.followupAnswers && Object.keys(payload.followupAnswers).length
       ? `Respuestas adicionales:\n${Object.entries(payload.followupAnswers).map(([k, v]) => `- ${k}: ${v}`).join("\n")}`
       : "",
@@ -488,17 +503,39 @@ Devuelve SOLO JSON válido en español siguiendo el schema.
 
 Objetivo: producir un mini diagnóstico ejecutivo, específico y accionable. Debe sentirse como una lectura consultiva para esa empresa concreta, no como una plantilla.
 
-Inputs disponibles: objetivo 6-12 meses, áreas de impacto, situación actual de IA, quién usa IA, herramientas IA, tareas que consumen tiempo, horas semanales perdidas en tareas repetitivas automatizables, bloqueadores, prioridad inicial, resultado deseado a 90 días, cargo, empresa y nº de empleados.
+Inputs disponibles: objetivo 6-12 meses, áreas de empresa donde la IA podría impactar, situación actual de IA, quién usa IA, herramientas IA, tareas que consumen tiempo, horas semanales perdidas por empleado en tareas repetitivas automatizables, bloqueadores, prioridad inicial, resultado deseado a 90 días, cargo, empresa y nº de empleados.
 
 Reglas críticas:
-- El summary debe mencionar madurez actual, bloqueador o freno principal, área/foco recomendado y resultado deseado a 90 días si está disponible.
-- Nombra un best_first_move claro: el primer caso de uso que debería activar la empresa.
+- El summary debe tener máximo 60 caracteres. Debe ser una frase corta que explique cómo mejorar el score.
+- Nombra un best_first_move claro y muy concreto: el primer caso de uso que debería activar la empresa según área, tarea, herramientas actuales y horas perdidas.
+- En best_first_move.first_action incluye una acción concreta y una herramienta posible si encaja. Ejemplos: ChatGPT, Copilot, Gemini, Claude, Make, Zapier, n8n, Google Sheets, Google Drive, Canva, OpenAI API.
 - Cada priority debe incluir proceso concreto, síntoma actual, primera intervención realista y efecto de negocio.
+- Cada priority.body debe sentirse adaptado al caso: usa al menos dos señales del input, por ejemplo área + tarea, bloqueador + prioridad, herramienta actual + objetivo, horas perdidas + resultado deseado.
+- Cada priority.first_intervention debe nombrar una acción implementable en 1-2 semanas y, si procede, una herramienta concreta.
+- Cada priority.concrete_process no puede ser genérico. Debe nombrar el proceso real: reporting semanal, cualificación comercial, respuestas repetitivas a clientes, documentación interna, generación de contenidos, análisis de datos, onboarding, etc.
+- Cada priority.business_effect debe explicar un efecto verificable: menos horas manuales, menor tiempo de respuesta, mejor calidad del entregable, más velocidad comercial, menos dependencia de una persona, mejor visibilidad directiva.
 - El roadmap 30/60/90 debe tener acciones tangibles conectadas con el resultado deseado, no frases abstractas.
 - No inventes sector, facturación, herramientas o datos no presentes.
 - Si el usuario marca "No lo tenemos claro", el diagnóstico debe priorizar discovery, casos de uso y criterio antes de automatizaciones complejas.
 - Si los bloqueadores incluyen privacidad/seguridad, incluye un paso concreto de criterios de uso, datos y gobernanza ligera.
 - Follow-up solo si falta una información imprescindible; no lo uses por defecto.
+
+Lógica de personalización:
+- Si el área incluye marketing: prioriza contenidos, research, campañas, assets, reporting o conversión. Menciona ChatGPT/Claude/Gemini para research y copy, Canva si aparece creatividad, y automatización solo si hay tareas repetitivas claras.
+- Si el área incluye ventas: prioriza prospección, cualificación, seguimiento, propuestas, CRM ligero o respuesta rápida. Menciona ChatGPT/Claude para mensajes/propuestas y Make/Zapier/n8n solo para flujos repetibles.
+- Si el área incluye atención al cliente: prioriza FAQs, clasificación de consultas, respuestas repetitivas, base de conocimiento y tiempos de respuesta. Menciona ChatGPT/OpenAI API solo si hay volumen y madurez suficiente.
+- Si el área incluye operaciones o administración: prioriza reporting, documentos, coordinación, back office, hojas de cálculo y aprobaciones. Menciona Google Sheets/Drive, Make, Zapier o n8n cuando el stack lo permita.
+- Si el área incluye RRHH: prioriza onboarding, formación interna, documentación, soporte a managers y procesos repetitivos. Evita automatizaciones complejas si falta formación.
+- Si el área incluye dirección/estrategia: prioriza visibilidad, KPIs, síntesis ejecutiva, reporting y priorización por impacto/viabilidad.
+- Si la empresa no usa IA o la usa de forma individual: no propongas agentes avanzados. Propón formación aplicada, playbooks, primer caso de uso y medición básica.
+- Si ya usa IA de forma regular o en varios equipos: propón estandarización, ownership, integración ligera y escalado selectivo.
+- Si las herramientas actuales son "No usamos ninguna", recomienda empezar con herramientas accesibles y bajo riesgo, no arquitectura técnica.
+- Si las horas perdidas por empleado son altas, conecta las prioridades con reducción de trabajo manual individual, medición semanal y escalado prudente al equipo impactado.
+
+Evita:
+- Frases como "la IA puede transformar", "oportunidad clara", "optimizar procesos" sin nombrar proceso.
+- Listas de herramientas sin explicar para qué se usarían.
+- Repetir la misma idea en best_first_move, priorities y roadmap.
 
 Cursos Sixminds:
 - Recomienda exactamente 2 cursos reales de esta whitelist: ${COURSE_NAMES.map(name => `"${name}"`).join(", ")}.
@@ -511,7 +548,7 @@ CTA:
 - Si prioridad = department_roadmap/adoption_strategy/use_cases o hay bloqueadores strategy/leadership/privacy, primary.type debe ser "call".
 - En el resto, primary.type debe ser "course".
 
-Métricas de referencia: score ${metrics.score}, equipo impactado ${metrics.impactedTeam}, horas perdidas ${metrics.totalH}, ahorro priorizable EUR ${metrics.mSaved}, ROI 12m EUR ${metrics.roi12m}, benchmark ${metrics.benchmark.label}.`;
+Métricas de referencia por empleado: score ${metrics.score}, horas perdidas por empleado/año ${metrics.totalH}, coste oculto por empleado EUR ${metrics.moneyL}, ahorro priorizable por empleado EUR ${metrics.mSaved}, ROI 12m por empleado EUR ${metrics.roi12m}, benchmark ${metrics.benchmark.label}. Referencia interna no protagonista: equipo impactado estimado ${metrics.impactedTeam}, coste agregado prudente EUR ${metrics.moneyLTeam}.`;
 }
 async function askModel(payload, metrics, env) {
   if (!env.OPENAI_API_KEY) throw new Error("missing_openai_api_key");

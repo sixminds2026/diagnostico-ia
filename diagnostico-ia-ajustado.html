@@ -46,7 +46,7 @@ body{font-family:var(--f);background:radial-gradient(circle at top,rgba(117,251,
 .tag{font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--g);margin-bottom:22px;display:flex;align-items:center;gap:10px}
 .tag::before{content:'';width:20px;height:1px;background:var(--g);flex-shrink:0}
 h1{font-size:clamp(42px,6vw,68px);font-weight:500;line-height:1.06;letter-spacing:-.026em;margin-bottom:22px;color:var(--w)}
-h2{font-size:clamp(32px,4.4vw,50px);font-weight:500;line-height:1.08;letter-spacing:-.022em;margin-bottom:16px;color:var(--w)}
+h2{font-size:clamp(28px,3.7vw,42px);font-weight:500;line-height:1.1;letter-spacing:-.02em;margin-bottom:16px;color:var(--w)}
 .sub{font-size:19px;color:var(--w6);line-height:1.72;margin-bottom:38px;max-width:620px;font-weight:400}
 .hl{color:var(--g)}
 
@@ -291,8 +291,8 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
 <!-- 2: AREAS -->
 <div class="step" id="s2">
   <div class="tag">02 / 11 - Impacto</div>
-  <h2>¿En qué áreas crees que la IA podría generar más impacto hoy?</h2>
-  <p class="sub">Puedes seleccionar varias. Si todavía no está claro, también nos sirve saberlo.</p>
+  <h2>¿En qué áreas de vuestra empresa crees que la IA podría tener más impacto hoy?</h2>
+  <p class="sub">Piensa en áreas donde ahora hay más carga manual, lentitud, dependencia de personas clave o margen de mejora.</p>
   <div class="chips" id="chips-areas">
     <div class="chip" onclick="tog(this,'areas','marketing')">Marketing</div>
     <div class="chip" onclick="tog(this,'areas','sales')">Ventas</div>
@@ -302,6 +302,8 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
     <div class="chip" onclick="tog(this,'areas','admin')">Administración / back office</div>
     <div class="chip" onclick="tog(this,'areas','management')">Dirección / estrategia</div>
     <div class="chip" onclick="tog(this,'areas','product')">Producto / innovación</div>
+    <div class="chip" onclick="tog(this,'areas','finance')">Finanzas / control de gestión</div>
+    <div class="chip" onclick="tog(this,'areas','it_data')">IT / datos</div>
     <div class="chip" onclick="tog(this,'areas','unclear')">No lo tenemos claro aún</div>
   </div>
   <div class="row">
@@ -392,6 +394,8 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
     <div class="chip" onclick="tog(this,'ai_tools','claude')">Claude</div>
     <div class="chip" onclick="tog(this,'ai_tools','canva')">Canva / herramientas creativas con IA</div>
     <div class="chip" onclick="tog(this,'ai_tools','automations')">Automatizaciones con IA</div>
+    <div class="chip" onclick="tog(this,'ai_tools','notion')">Notion AI / asistentes internos</div>
+    <div class="chip" onclick="tog(this,'ai_tools','crm_ai')">CRM o herramientas comerciales con IA</div>
     <div class="chip" onclick="tog(this,'ai_tools','specific')">Otras herramientas específicas</div>
     <div class="chip" onclick="tog(this,'ai_tools','none')">No usamos ninguna</div>
   </div>
@@ -415,6 +419,8 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
     <div class="chip" onclick="tog(this,'tasks','sales_prospecting')">Prospección comercial / ventas</div>
     <div class="chip" onclick="tog(this,'tasks','coordination')">Organización y coordinación interna</div>
     <div class="chip" onclick="tog(this,'tasks','training_docs')">Formación / documentación interna</div>
+    <div class="chip" onclick="tog(this,'tasks','email_meetings')">Emails, reuniones y seguimiento</div>
+    <div class="chip" onclick="tog(this,'tasks','quality_review')">Revisión de calidad / control de errores</div>
     <div class="chip" onclick="tog(this,'tasks','unclear')">No lo tenemos claro todavía</div>
   </div>
   <div class="row">
@@ -426,31 +432,31 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
 <!-- 7: HORAS PERDIDAS -->
 <div class="step" id="s7">
   <div class="tag">07 / 11 - Tiempo recuperable</div>
-  <h2>¿Cuántas horas perdéis a la semana en tareas repetitivas que podrían automatizarse con IA?</h2>
-  <p class="sub">No hace falta que sea exacto. Una estimación honesta nos ayuda a calcular potencial, prioridad y retorno con más criterio.</p>
+  <h2>¿Cuántas horas pierde una persona a la semana en tareas repetitivas que podrían automatizarse con IA?</h2>
+  <p class="sub">Estimación por empleado. Así evitamos números inflados y calculamos un coste más realista.</p>
   <div class="opts">
     <div class="opt" onclick="pick(this,'usage','0_5',0)">
-      <div class="opt-text"><div class="opt-title">0 - 5 horas / semana</div><div class="opt-desc">Hay fricción, pero todavía no parece crítica.</div></div>
+      <div class="opt-text"><div class="opt-title">0 - 5 horas / empleado / semana</div><div class="opt-desc">Hay fricción, pero todavía no parece crítica.</div></div>
       <div class="opt-radio"></div>
     </div>
     <div class="opt" onclick="pick(this,'usage','5_10',0)">
-      <div class="opt-text"><div class="opt-title">5 - 10 horas / semana</div><div class="opt-desc">Ya existe margen claro para liberar tiempo operativo.</div></div>
+      <div class="opt-text"><div class="opt-title">5 - 10 horas / empleado / semana</div><div class="opt-desc">Ya existe margen claro para liberar tiempo operativo.</div></div>
       <div class="opt-radio"></div>
     </div>
     <div class="opt" onclick="pick(this,'usage','10_15',0)">
-      <div class="opt-text"><div class="opt-title">10 - 15 horas / semana</div><div class="opt-desc">La automatización puede tener impacto visible en semanas.</div></div>
+      <div class="opt-text"><div class="opt-title">10 - 15 horas / empleado / semana</div><div class="opt-desc">La automatización puede tener impacto visible en semanas.</div></div>
       <div class="opt-radio"></div>
     </div>
     <div class="opt" onclick="pick(this,'usage','15_25',0)">
-      <div class="opt-text"><div class="opt-title">15 - 25 horas / semana</div><div class="opt-desc">Probablemente hay procesos repetitivos que conviene priorizar ya.</div></div>
+      <div class="opt-text"><div class="opt-title">15 - 20 horas / empleado / semana</div><div class="opt-desc">Probablemente hay procesos repetitivos que conviene priorizar ya.</div></div>
       <div class="opt-radio"></div>
     </div>
-    <div class="opt" onclick="pick(this,'usage','25_40',0)">
-      <div class="opt-text"><div class="opt-title">25 - 40 horas / semana</div><div class="opt-desc">El coste oculto ya puede justificar un plan de implantación más serio.</div></div>
+    <div class="opt" onclick="pick(this,'usage','20_30',0)">
+      <div class="opt-text"><div class="opt-title">20 - 30 horas / empleado / semana</div><div class="opt-desc">El coste oculto ya puede justificar un plan de implantación más serio.</div></div>
       <div class="opt-radio"></div>
     </div>
-    <div class="opt" onclick="pick(this,'usage','40_plus',0)">
-      <div class="opt-text"><div class="opt-title">Más de 40 horas / semana</div><div class="opt-desc">Hay una oportunidad clara de rediseñar procesos y no solo formar al equipo.</div></div>
+    <div class="opt" onclick="pick(this,'usage','30_plus',0)">
+      <div class="opt-text"><div class="opt-title">Más de 30 horas / empleado / semana</div><div class="opt-desc">Conviene revisar procesos, prioridades y automatización con cuidado.</div></div>
       <div class="opt-radio"></div>
     </div>
   </div>
@@ -473,6 +479,8 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
     <div class="chip" onclick="tog(this,'blockers','tools')">Dudas sobre herramientas</div>
     <div class="chip" onclick="tog(this,'blockers','privacy')">Dudas sobre privacidad / seguridad</div>
     <div class="chip" onclick="tog(this,'blockers','use_cases')">No vemos aún casos de uso claros</div>
+    <div class="chip" onclick="tog(this,'blockers','data_quality')">Datos desordenados o poco accesibles</div>
+    <div class="chip" onclick="tog(this,'blockers','process_clarity')">Procesos poco definidos</div>
     <div class="chip" onclick="tog(this,'blockers','leadership')">Falta de apoyo interno / liderazgo</div>
     <div class="chip" onclick="tog(this,'blockers','budget')">Presupuesto limitado</div>
   </div>
@@ -607,6 +615,8 @@ const AREA_MAP = {
   admin: 'Administración / back office',
   management: 'Dirección / estrategia',
   product: 'Producto / innovación',
+  finance: 'Finanzas / control de gestión',
+  it_data: 'IT / datos',
   unclear: 'No lo tenemos claro aún'
 };
 
@@ -634,6 +644,8 @@ const AI_TOOL_MAP = {
   claude: 'Claude',
   canva: 'Canva / herramientas creativas con IA',
   automations: 'Automatizaciones con IA',
+  notion: 'Notion AI / asistentes internos',
+  crm_ai: 'CRM o herramientas comerciales con IA',
   specific: 'Otras herramientas específicas',
   none: 'No usamos ninguna'
 };
@@ -647,16 +659,18 @@ const TASK_MAP = {
   sales_prospecting: 'Prospección comercial / ventas',
   coordination: 'Organización y coordinación interna',
   training_docs: 'Formación / documentación interna',
+  email_meetings: 'Emails, reuniones y seguimiento',
+  quality_review: 'Revisión de calidad / control de errores',
   unclear: 'No lo tenemos claro todavía'
 };
 
 const USAGE_MAP = {
-  '0_5': '0 - 5 horas / semana',
-  '5_10': '5 - 10 horas / semana',
-  '10_15': '10 - 15 horas / semana',
-  '15_25': '15 - 25 horas / semana',
-  '25_40': '25 - 40 horas / semana',
-  '40_plus': 'Más de 40 horas / semana'
+  '0_5': '0 - 5 horas / empleado / semana',
+  '5_10': '5 - 10 horas / empleado / semana',
+  '10_15': '10 - 15 horas / empleado / semana',
+  '15_25': '15 - 20 horas / empleado / semana',
+  '20_30': '20 - 30 horas / empleado / semana',
+  '30_plus': 'Más de 30 horas / empleado / semana'
 };
 
 const BLOCKER_MAP = {
@@ -667,6 +681,8 @@ const BLOCKER_MAP = {
   tools: 'Dudas sobre herramientas',
   privacy: 'Dudas sobre privacidad / seguridad',
   use_cases: 'No vemos aún casos de uso claros',
+  data_quality: 'Datos desordenados o poco accesibles',
+  process_clarity: 'Procesos poco definidos',
   leadership: 'Falta de apoyo interno / liderazgo',
   budget: 'Presupuesto limitado'
 };
@@ -862,14 +878,14 @@ function serializePayload(payload, metrics) {
     `Quien usa IA: ${AI_USERS_MAP[answers.ai_users] || 'No indicado'}`,
     `Herramientas IA: ${(chips.ai_tools || []).map(item => AI_TOOL_MAP[item] || item).join(', ') || 'No indicado'}`,
     `Tareas que consumen mas tiempo: ${(chips.tasks || []).map(item => TASK_MAP[item] || item).join(', ') || 'No indicado'}`,
-    `Horas semanales perdidas en tareas repetitivas automatizables: ${USAGE_MAP[answers.usage] || 'No indicado'}`,
+    `Horas semanales perdidas por empleado en tareas repetitivas automatizables: ${USAGE_MAP[answers.usage] || 'No indicado'}`,
     `Bloqueadores: ${(chips.blockers || []).map(item => BLOCKER_MAP[item] || item).join(', ') || 'No indicado'}`,
     `Prioridad de arranque: ${PRIORITY_MAP[answers.priority] || 'No indicada'}`,
     `Resultado deseado en 90 dias: ${payload.desiredOutcome || 'No indicado'}`,
     `Equipo impactado estimado: ${metrics.impactedTeam}`,
-    `Horas perdidas estimadas: ${metrics.totalH}`,
-    `Coste oculto anual estimado: EUR ${metrics.moneyL}`,
-    `Ahorro anual priorizable: EUR ${metrics.mSaved}`,
+    `Horas perdidas estimadas por empleado al año: ${metrics.totalH}`,
+    `Coste oculto anual estimado por empleado: EUR ${metrics.moneyL}`,
+    `Ahorro anual priorizable por empleado: EUR ${metrics.mSaved}`,
     payload.followupAnswers && Object.keys(payload.followupAnswers).length
       ? `Respuestas adicionales:\n${Object.entries(payload.followupAnswers).map(([k, v]) => `- ${k}: ${v}`).join('\n')}`
       : ''
@@ -905,12 +921,12 @@ async function askOpenAI(payload) {
 
 function calcMetrics() {
   const situationScoreMap = { none: 14, individual: 28, pilots: 44, regular: 62, embedded: 76 };
-  const lostHoursScoreMap = { '0_5': 2, '5_10': 5, '10_15': 8, '15_25': 12, '25_40': 16, '40_plus': 18 };
-  const lostHoursMidMap = { '0_5': 2.5, '5_10': 7.5, '10_15': 12.5, '15_25': 20, '25_40': 32.5, '40_plus': 48 };
+  const lostHoursScoreMap = { '0_5': 2, '5_10': 5, '10_15': 8, '15_25': 11, '20_30': 14, '30_plus': 16 };
+  const lostHoursMidMap = { '0_5': 2.5, '5_10': 7.5, '10_15': 12.5, '15_25': 17.5, '20_30': 25, '30_plus': 32 };
   const userScoreMap = { nobody: 0, management: 4, few_people: 8, one_department: 12, several_departments: 18, company_wide: 24 };
   const situationHoursMap = { none: 4.2, individual: 3.4, pilots: 2.7, regular: 1.9, embedded: 1.25 };
   const savingsMap = { none: 0.26, individual: 0.24, pilots: 0.21, regular: 0.17, embedded: 0.13 };
-  const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, unclear: 0.26 };
+  const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, finance: 0.22, it_data: 0.2, unclear: 0.26 };
 
   const rawEmployees = Number(fieldValue('femployees').replace(/[^\d]/g, ''));
   const team = Math.max(1, Math.min(500, rawEmployees || 12));
@@ -927,10 +943,11 @@ function calcMetrics() {
   const impactedShare = areaCoverage[mainArea] || 0.3;
   const impactedTeam = Math.max(2, Math.min(team, Math.round(team * impactedShare)));
   const blockerFactor = 1 + Math.min(0.24, (blockerCount - 1) * 0.06);
-  const declaredWeeklyHours = lostHoursMidMap[S.a.usage?.val];
-  const modeledWeeklyHours = (situationHoursMap[S.a.ai_situation?.val] || 3.4) * impactedTeam * blockerFactor * (1 + (taskCount - 1) * 0.07);
-  const weeklyHours = declaredWeeklyHours || modeledWeeklyHours;
-  const hrs = weeklyHours / Math.max(1, impactedTeam);
+  const declaredWeeklyHoursPerEmployee = lostHoursMidMap[S.a.usage?.val];
+  const modeledWeeklyHoursPerEmployee = (situationHoursMap[S.a.ai_situation?.val] || 3.4) * blockerFactor * (1 + (taskCount - 1) * 0.07);
+  const weeklyHoursPerEmployee = Math.min(40, declaredWeeklyHoursPerEmployee || modeledWeeklyHoursPerEmployee);
+  const weeklyHoursTeam = weeklyHoursPerEmployee * impactedTeam;
+  const hrs = weeklyHoursPerEmployee;
   const scoreRaw =
     (situationScoreMap[S.a.ai_situation?.val] || 28) +
     (lostHoursScoreMap[S.a.usage?.val] || 0) +
@@ -940,13 +957,18 @@ function calcMetrics() {
     (team > 40 ? 3 : 0) -
     (S.a.objective?.val === 'explore' ? 4 : 0);
   const score = Math.max(8, Math.min(92, Math.round(scoreRaw)));
-  const totalH = Math.round(weeklyHours * 48);
+  const totalH = Math.round(weeklyHoursPerEmployee * 48);
   const moneyL = Math.round(totalH * hourlyCost);
+  const totalHTeam = Math.round(weeklyHoursTeam * 48);
+  const moneyLTeam = Math.round(totalHTeam * hourlyCost);
   const saveRate = savingsMap[S.a.ai_situation?.val] || 0.24;
   const hSaved = Math.round(totalH * saveRate);
   const mSaved = Math.round(moneyL * saveRate);
-  const revenueAtRisk = Math.round(Math.min(revenue * 0.18, moneyL * 1.35));
-  const roi12m = Math.round(mSaved * 1.55);
+  const hSavedTeam = Math.round(totalHTeam * saveRate);
+  const mSavedTeam = Math.round(moneyLTeam * saveRate);
+  const revenueAtRisk = Math.round(Math.min(revenue * 0.08, moneyLTeam * 0.8));
+  const roi12m = Math.round(mSaved * 1.35);
+  const roi12mTeam = Math.round(mSavedTeam * 1.35);
   const benchmark =
     score < 30
       ? { label: 'Por debajo del punto de partida habitual', note: 'Hace falta priorizar un primer caso de uso, ownership y una implantación guiada para capturar valor rápido.' }
@@ -962,12 +984,17 @@ function calcMetrics() {
     score,
     totalH,
     moneyL,
+    totalHTeam,
+    moneyLTeam,
     hSaved,
     mSaved,
+    hSavedTeam,
+    mSavedTeam,
     hourlyCost,
     revenue,
     revenueAtRisk,
     roi12m,
+    roi12mTeam,
     saveRate,
     benchmark
   };
@@ -985,6 +1012,14 @@ function esc(value) {
 
 function cleanText(value) {
   return String(value ?? '');
+}
+
+function conciseText(value, max = 60) {
+  const text = cleanText(value).replace(/\s+/g, ' ').trim();
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max + 1);
+  const boundary = cut.lastIndexOf(' ');
+  return `${cut.slice(0, boundary > 36 ? boundary : max).trim()}…`;
 }
 
 function fieldValue(id) {
@@ -1320,10 +1355,10 @@ function ensureResultsShell() {
         </div>
       </div>
       <div class="metrics">
-        <div class="mcard"><div class="mlbl">Horas perdidas / año</div><div class="mval" id="m-hl">—</div><div class="msub">fricción operativa anual estimada</div></div>
-        <div class="mcard"><div class="mlbl">Coste oculto actual</div><div class="mval" id="m-ml">—</div><div class="msub">impacto económico anual estimado</div></div>
-        <div class="mcard accent"><div class="mlbl">Ahorro priorizable</div><div class="mval green" id="m-ms">—</div><div class="msub">si se ejecuta bien el primer frente</div></div>
-        <div class="mcard accent"><div class="mlbl">ROI potencial 12 meses</div><div class="mval green" id="m-roi">—</div><div class="msub">retorno orientativo si el plan escala</div></div>
+        <div class="mcard"><div class="mlbl">Horas perdidas / empleado / año</div><div class="mval" id="m-hl">—</div><div class="msub">fricción repetitiva anual por persona</div></div>
+        <div class="mcard"><div class="mlbl">Coste oculto / empleado</div><div class="mval" id="m-ml">—</div><div class="msub">estimación anual prudente por persona</div></div>
+        <div class="mcard accent"><div class="mlbl">Ahorro priorizable / empleado</div><div class="mval green" id="m-ms">—</div><div class="msub">parte recuperable con el primer frente</div></div>
+        <div class="mcard accent"><div class="mlbl">ROI potencial / empleado</div><div class="mval green" id="m-roi">—</div><div class="msub">retorno orientativo anual prudente</div></div>
       </div>
       <div class="dashboard-card">
         <div class="section-head">Top 3 oportunidades priorizadas</div>
@@ -1356,7 +1391,7 @@ function renderResults(data) {
   const score = data.score || c.score;
   const courses = normalizeCourses(data);
   const cta = deriveCta(score);
-  const summary = cleanText(data.summary || 'Hay margen claro para mejorar foco, eficiencia y adopción con un plan más ejecutivo y accionable.');
+  const summary = conciseText(data.summary || 'Prioriza un caso de uso medible y accionable.', 60);
   const bestMove = data.best_first_move || fallback().best_first_move;
 
   setText('r-company', company);
@@ -1381,6 +1416,9 @@ function renderResults(data) {
       </div>
       <div class="prio-title">${esc(cleanText(p.title))}</div>
       <div class="prio-body">${esc(cleanText(p.body))}</div>
+      ${p.concrete_process ? `<div class="tool-why" style="margin-top:14px"><span class="hl">Proceso:</span> ${esc(cleanText(p.concrete_process))}</div>` : ''}
+      ${p.first_intervention ? `<div class="tool-why" style="margin-top:10px"><span class="hl">Acción inicial:</span> ${esc(cleanText(p.first_intervention))}</div>` : ''}
+      ${p.business_effect ? `<div class="tool-why" style="margin-top:10px"><span class="hl">Efecto:</span> ${esc(cleanText(p.business_effect))}</div>` : ''}
       ${p.why_now ? `<div class="tool-why" style="margin-top:14px"><span class="hl">Por qué ahora:</span> ${esc(cleanText(p.why_now))}</div>` : ''}
     </div>
   `).join('');

@@ -1,0 +1,1526 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico de Madurez IA - Sixminds Business</title>
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+<script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#75fb92;
+  --gd:rgba(117,251,146,0.08);
+  --gb:rgba(117,251,146,0.22);
+  --bg:#070707;
+  --c1:#0d0f0d;
+  --c2:#111411;
+  --ln:rgba(117,251,146,0.12);
+  --ln2:rgba(117,251,146,0.22);
+  --w:#ffffff;
+  --w6:rgba(255,255,255,0.84);
+  --w3:rgba(255,255,255,0.62);
+  --w1:rgba(255,255,255,0.18);
+  --r-sm:16px;
+  --r-md:22px;
+  --r-lg:30px;
+  --f:'Plus Jakarta Sans',sans-serif
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--f);background:radial-gradient(circle at top,rgba(117,251,146,0.1),transparent 26%),var(--bg);color:var(--w);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-size:18px}
+
+/* Progress */
+.prog-wrap{position:fixed;top:0;left:0;right:0;height:1.5px;background:var(--ln);z-index:300}
+.prog-bar{height:100%;background:var(--g);transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px rgba(117,251,146,.35)}
+.prog-label{position:fixed;top:18px;right:24px;font-size:13px;font-weight:500;color:var(--w3);z-index:300;letter-spacing:.06em;display:none}
+
+/* Steps */
+.step{display:none;min-height:100vh;padding:64px 40px 56px;max-width:940px;margin:0 auto;width:100%;flex-direction:column;justify-content:center}
+.step#s-results{max-width:1380px;padding-left:48px;padding-right:48px}
+.step#s-followup{max-width:1160px}
+.step.on{display:flex;animation:up .38s cubic-bezier(.4,0,.2,1) both}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* Typography */
+.tag{font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--g);margin-bottom:22px;display:flex;align-items:center;gap:10px}
+.tag::before{content:'';width:20px;height:1px;background:var(--g);flex-shrink:0}
+h1{font-size:clamp(42px,6vw,68px);font-weight:500;line-height:1.06;letter-spacing:-.026em;margin-bottom:22px;color:var(--w)}
+h2{font-size:clamp(32px,4.4vw,50px);font-weight:500;line-height:1.08;letter-spacing:-.022em;margin-bottom:16px;color:var(--w)}
+.sub{font-size:19px;color:var(--w6);line-height:1.72;margin-bottom:38px;max-width:620px;font-weight:400}
+.hl{color:var(--g)}
+
+/* Intro pill */
+.pill{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--gb);color:var(--g);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:10px 18px;border-radius:999px;margin-bottom:34px}
+.dot{width:6px;height:6px;background:var(--g);border-radius:50%;animation:blink 2.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* Options list */
+.opts{display:flex;flex-direction:column;gap:8px;margin-bottom:32px}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 24px;background:var(--c1);border:1px solid var(--ln);border-radius:var(--r-md);cursor:pointer;transition:border-color .18s,background .18s,transform .18s;user-select:none}
+.opt:hover{border-color:var(--gb);background:var(--c2)}
+.opt:hover,.gcard:hover,.chip:hover,.mcard:hover,.tool:hover,.prio-card:hover,.dashboard-note:hover,.followup-card:hover{transform:translateY(-1px)}
+.opt.sel{border-color:var(--g);background:var(--gd);box-shadow:0 0 0 1px rgba(117,251,146,0.16) inset}
+.opt-text{flex:1}
+.opt-title{font-size:18px;font-weight:500;color:var(--w);line-height:1.3;margin-bottom:4px}
+.opt-desc{font-size:15px;color:var(--w6);line-height:1.5;font-weight:400}
+.opt-radio{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ln2);flex-shrink:0;transition:all .18s;position:relative}
+.opt.sel .opt-radio{border-color:var(--g);background:var(--g)}
+.opt.sel .opt-radio::after{content:'';position:absolute;inset:4px;background:#000;border-radius:50%}
+
+/* Grid cards (for sector etc) */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:32px}
+.gcard{padding:22px;background:var(--c1);border:1px solid var(--ln);border-radius:var(--r-md);cursor:pointer;transition:border-color .18s,background .18s,transform .18s;user-select:none;position:relative}
+.gcard:hover{border-color:var(--gb);background:var(--c2)}
+.gcard.sel{border-color:var(--g);background:var(--gd)}
+.gcard-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--w3);margin-bottom:8px}
+.gcard-title{font-size:17px;font-weight:500;color:var(--w);line-height:1.3;margin-bottom:6px}
+.gcard-desc{font-size:14px;color:var(--w6);line-height:1.5;font-weight:400}
+.gcheck{position:absolute;top:14px;right:14px;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--ln2);transition:all .18s}
+.gcard.sel .gcheck{background:var(--g);border-color:var(--g)}
+
+/* Two-group step */
+.group-label{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--w3);margin-bottom:12px;margin-top:24px}
+.group-label:first-of-type{margin-top:0}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:36px}
+.chip{padding:13px 18px;border-radius:999px;border:1px solid var(--ln2);background:var(--c1);font-family:var(--f);font-size:15px;font-weight:500;color:var(--w6);cursor:pointer;transition:all .18s;user-select:none}
+.chip:hover{border-color:var(--gb);color:var(--w)}
+.chip.sel{border-color:var(--g);background:var(--gd);color:var(--g)}
+.chip-hint{font-size:13px;color:var(--w3);margin-bottom:16px;margin-top:-24px;font-weight:400}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:15px 28px;border-radius:999px;font-family:var(--f);font-size:16px;font-weight:500;cursor:pointer;transition:all .2s;border:none;text-decoration:none}
+.btn:active{transform:scale(.97)}
+.btn-green{background:var(--g);color:#000;font-weight:500}
+.btn-green:hover:not(:disabled){box-shadow:0 4px 24px rgba(117,251,146,.25);transform:translateY(-1px)}
+.btn-green:disabled{opacity:.2;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-outline{background:rgba(117,251,146,0.08);color:var(--w);border:1px solid rgba(117,251,146,0.26);font-size:15px;padding:14px 22px}
+.btn-outline:hover{border-color:var(--g);color:var(--w);background:rgba(117,251,146,0.14)}
+.btn-outline-g{background:rgba(117,251,146,0.16);color:var(--w);border:1px solid rgba(117,251,146,0.5);font-size:16px;padding:15px 28px;box-shadow:0 10px 28px rgba(117,251,146,0.08)}
+.btn-outline-g:hover{background:rgba(117,251,146,0.24);border-color:var(--g);color:var(--w)}
+.row{display:flex;align-items:center;gap:10px}
+.btn-full{width:100%;border-radius:999px;padding:18px 32px;font-size:17px}
+
+/* Form inputs */
+.field{margin-bottom:18px}
+.flabel{display:block;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--w3);margin-bottom:10px}
+input[type=text],input[type=email],input[type=tel],textarea{width:100%;padding:17px 18px;background:var(--c1);border:1px solid var(--ln2);border-radius:var(--r-md);color:var(--w);font-family:var(--f);font-size:17px;font-weight:400;outline:none;transition:border-color .18s;-webkit-appearance:none}
+textarea{min-height:120px;resize:vertical}
+input:focus{border-color:var(--g)}
+input::placeholder,textarea::placeholder{color:var(--w1)}
+.fnote{margin-top:12px;font-size:13px;color:var(--w3);display:flex;align-items:center;gap:6px;font-weight:400}
+.check-field{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;background:var(--c1);border:1px solid var(--ln2);border-radius:var(--r-md);margin-bottom:14px}
+.check-field input{margin-top:3px;accent-color:var(--g);width:16px;height:16px;flex-shrink:0}
+.check-copy{font-size:14px;line-height:1.65;color:var(--w6)}
+.check-copy a{color:var(--g);text-decoration:none}
+.check-copy a:hover{text-decoration:underline}
+
+/* Intro stats */
+.stats{display:flex;gap:0;margin-top:48px;border-top:1px solid var(--ln);padding-top:28px}
+.stat{flex:1;padding-right:20px}
+.stat+.stat{padding-left:20px;padding-right:20px;border-left:1px solid var(--ln)}
+.stat-n{font-size:32px;font-weight:500;color:var(--g);letter-spacing:-.03em;line-height:1;margin-bottom:5px}
+.stat-l{font-size:14px;color:var(--w6);line-height:1.5;font-weight:400}
+
+/* Loading */
+#step-loading{text-align:center;padding:80px 28px}
+.load-num{font-size:78px;font-weight:500;color:var(--g);letter-spacing:-.05em;line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.load-sub{font-size:15px;color:var(--w3);letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.load-bar{width:200px;height:1px;background:var(--ln);margin:32px auto;position:relative;overflow:hidden}
+.load-bar::after{content:'';position:absolute;left:-100%;top:0;height:100%;width:100%;background:var(--g);animation:scan 1.6s ease-in-out infinite}
+@keyframes scan{0%{left:-100%}100%{left:100%}}
+.load-msg{font-size:17px;color:var(--w6);margin-top:8px;min-height:24px;transition:opacity .3s}
+
+/* Results */
+.report-shell{display:flex;flex-direction:column;gap:24px}
+.report-top{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(360px,.95fr);gap:24px;align-items:stretch}
+.dashboard-card,.followup-card,.mcard,.tool,.prio-card,.roadmap-card,.dashboard-note{background:linear-gradient(180deg,rgba(117,251,146,0.04),rgba(255,255,255,0.015));border:1px solid rgba(117,251,146,0.18);border-radius:var(--r-lg);padding:32px}
+.report-company{color:var(--w)}
+.report-headline{font-size:clamp(28px,3.4vw,46px);font-weight:500;line-height:1.06;letter-spacing:-.03em;margin-bottom:14px;max-width:18ch}
+.report-summary{font-size:19px;color:var(--w);line-height:1.82;max-width:72ch}
+.report-score-card{display:flex;flex-direction:column;gap:26px;justify-content:space-between}
+.score-card-top{display:flex;align-items:flex-start;gap:22px}
+.score-svg{flex-shrink:0}
+.score-kicker{font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--g);margin-bottom:8px}
+.score-copy{font-size:18px;color:var(--w);line-height:1.75}
+.score-diagnosis{border-top:1px solid rgba(117,251,146,0.22);padding-top:22px}
+.score-diagnosis h3{font-size:24px;font-weight:500;line-height:1.18;letter-spacing:-.025em;color:var(--w);margin-bottom:10px}
+.score-diagnosis p{font-size:16px;line-height:1.7;color:var(--w);font-weight:400}
+.report-actions{display:flex;flex-direction:column;gap:12px}
+.report-actions .btn{width:100%;justify-content:center}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.mcard{padding:28px;border-color:rgba(117,251,146,0.18)}
+.mcard.accent{border-color:rgba(117,251,146,0.42);background:rgba(117,251,146,0.1)}
+.mlbl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--w3);margin-bottom:14px}
+.mval{font-size:38px;font-weight:500;letter-spacing:-.03em;line-height:1;margin-bottom:10px;color:var(--w)}
+.mval.green{color:var(--g)}
+.msub{font-size:14px;color:var(--w);font-weight:400;line-height:1.6}
+.report-grid{display:grid;grid-template-columns:minmax(0,1.38fr) minmax(320px,.92fr);gap:24px}
+.prio-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.courses-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.prio-card{padding:26px;border-color:rgba(117,251,146,0.18)}
+.prio-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.prio-index{font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--g)}
+.prio-badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.ptag{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;padding:7px 12px;border-radius:999px;border:1px solid var(--ln2);color:var(--w)}
+.ptag.hi{border-color:var(--gb);color:var(--g)}
+.prio-title{font-size:24px;font-weight:500;color:var(--w);line-height:1.18;margin-bottom:12px}
+.prio-body{font-size:17px;color:var(--w);line-height:1.76;font-weight:400}
+.dashboard-note h3{font-size:28px;font-weight:500;letter-spacing:-.025em;margin-bottom:12px;color:var(--w)}
+.dashboard-note p{font-size:17px;color:var(--w);line-height:1.78;position:relative;font-weight:400}
+.dashboard-note .cta-btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;position:relative}
+.dashboard-note .cta-btns .btn{flex:1 1 220px;justify-content:center}
+.results-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.results-actions .btn{flex:1 1 240px;justify-content:center}
+.cta-secondary-note{font-size:14px;color:var(--w);margin-top:12px}
+.section-head{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.14em;color:var(--w);margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.section-head::after{content:'';flex:1;height:1px;background:rgba(117,251,146,0.32)}
+.roadmap{display:flex;flex-direction:column;gap:16px}
+.roadmap-card{padding:28px}
+.rphase{padding:0}
+.rphase:last-child{border-bottom:none}
+.rphase-head{display:flex;align-items:baseline;gap:18px;margin-bottom:16px}
+.rphase-period{font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--g);width:92px;flex-shrink:0}
+.rphase-title{font-size:22px;font-weight:500;color:var(--w)}
+.rphase-items{display:flex;flex-direction:column;gap:12px;padding-left:108px}
+.ritem{font-size:17px;color:var(--w);line-height:1.7;display:flex;gap:10px;align-items:flex-start}
+.ritem::before{content:'';width:4px;height:4px;background:var(--g);border-radius:50%;flex-shrink:0;margin-top:8px}
+.tool{padding:26px;min-height:220px;border-color:rgba(117,251,146,0.18)}
+.course-card{padding:26px;min-height:220px;border-color:rgba(117,251,146,0.28);background:rgba(117,251,146,0.06)}
+.tool-name{font-size:20px;font-weight:500;color:var(--w);margin-bottom:10px}
+.course-name{font-size:22px;font-weight:500;color:var(--w);margin-bottom:10px;line-height:1.2}
+.tool-why{font-size:16px;color:var(--w);line-height:1.72;font-weight:400}
+.course-why{font-size:16px;color:var(--w);line-height:1.72;font-weight:400;margin-bottom:18px}
+.course-link{display:inline-flex;align-items:center;color:var(--g);font-size:15px;font-weight:500;text-decoration:none}
+.course-link:hover{text-decoration:underline}
+.cta-note{font-size:13px;color:var(--w);margin-top:12px;position:relative;font-weight:400}
+.followup-wrap{display:flex;flex-direction:column;gap:14px}
+.followup-help{font-size:18px;color:var(--w6);line-height:1.8;margin-bottom:8px}
+.followup-actions{display:flex;gap:10px}
+
+@media(max-width:1180px){
+  .step#s-results{max-width:1120px;padding-left:32px;padding-right:32px}
+  .report-top,.report-grid{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr 1fr}
+  .prio-grid{grid-template-columns:1fr}
+  .courses-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:560px){
+  .grid{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr}
+  .courses-grid{grid-template-columns:1fr}
+  .stats{flex-wrap:wrap;gap:20px}
+  .stat+.stat{border-left:none;padding-left:0}
+  .step,.step#s-results,.step#s-followup{padding:52px 18px 36px}
+  .cta-btns{flex-direction:column}
+  .cta-btns .btn{width:100%}
+  .rphase-items{padding-left:0;margin-top:8px}
+  .report-top,.report-grid,.prio-grid{grid-template-columns:1fr}
+  .score-card-top{flex-direction:column;align-items:flex-start}
+  .followup-actions{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<div class="prog-wrap"><div class="prog-bar" id="pb" style="width:0%"></div></div>
+<div class="prog-label" id="pl"></div>
+
+<div id="app">
+
+<!-- 0: INTRO -->
+<div class="step on" id="s0">
+  <div class="pill"><div class="dot"></div>Diagnóstico gratuito · 4 minutos</div>
+  <h1>¿Cuánto está costando la falta de IA a tu empresa?</h1>
+  <p class="sub">Responde 10 preguntas estratégicas y obtén una lectura ejecutiva de madurez IA: prioridades reales, primer caso de uso recomendado, plan 30/60/90 y siguiente paso más lógico.</p>
+  <button class="btn btn-green" style="font-size:16px;padding:16px 36px" onclick="go(1)">Iniciar diagnóstico</button>
+  <div class="stats">
+    <div class="stat"><div class="stat-n">73%</div><div class="stat-l">de empresas infrautilizan la IA a día de hoy</div></div>
+    <div class="stat"><div class="stat-n">14h</div><div class="stat-l">perdidas por persona y semana en tareas manuales</div></div>
+    <div class="stat"><div class="stat-n">€22k</div><div class="stat-l">coste medio anual de ineficiencia por equipo</div></div>
+  </div>
+</div>
+
+<!-- 1: OBJETIVO -->
+<div class="step" id="s1">
+  <div class="tag">01 / 11 - Objetivo</div>
+  <h2>¿Cuál es vuestro principal objetivo al aplicar IA en los próximos 6-12 meses?</h2>
+  <p class="sub">Esto marca el criterio del diagnóstico: eficiencia, crecimiento, calidad o exploración.</p>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,'objective','save_time',0)">
+      <div class="opt-text"><div class="opt-title">Ahorrar tiempo en tareas repetitivas</div><div class="opt-desc">Reducir carga manual y liberar horas del equipo.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'objective','productivity',0)">
+      <div class="opt-text"><div class="opt-title">Mejorar la productividad del equipo</div><div class="opt-desc">Ayudar a que el equipo produzca más y mejor con menos fricción.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'objective','reduce_costs',0)">
+      <div class="opt-text"><div class="opt-title">Reducir costes operativos</div><div class="opt-desc">Bajar coste oculto en procesos, coordinación o retrabajo.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'objective','sales_leads',0)">
+      <div class="opt-text"><div class="opt-title">Generar más ventas o leads</div><div class="opt-desc">Mejorar captación, seguimiento comercial y conversión.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'objective','quality',0)">
+      <div class="opt-text"><div class="opt-title">Mejorar la calidad del trabajo</div><div class="opt-desc">Estandarizar entregables, documentación, análisis o atención.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'objective','customer_service',0)">
+      <div class="opt-text"><div class="opt-title">Mejorar la atención al cliente</div><div class="opt-desc">Responder mejor, más rápido y con más consistencia.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'objective','speed_processes',0)">
+      <div class="opt-text"><div class="opt-title">Acelerar procesos internos</div><div class="opt-desc">Reducir esperas, pasos manuales y coordinación innecesaria.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'objective','explore',0)">
+      <div class="opt-text"><div class="opt-title">Explorar oportunidades, pero aún sin objetivo claro</div><div class="opt-desc">Entender por dónde empezar sin comprometer una implantación todavía.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+  </div>
+  <div class="row">
+    <button class="btn btn-outline" onclick="go(0)">Volver</button>
+    <button class="btn btn-green" id="b1" disabled onclick="go(2)">Siguiente</button>
+  </div>
+</div>
+
+<!-- 2: AREAS -->
+<div class="step" id="s2">
+  <div class="tag">02 / 11 - Impacto</div>
+  <h2>¿En qué áreas crees que la IA podría generar más impacto hoy?</h2>
+  <p class="sub">Puedes seleccionar varias. Si todavía no está claro, también nos sirve saberlo.</p>
+  <div class="chips" id="chips-areas">
+    <div class="chip" onclick="tog(this,'areas','marketing')">Marketing</div>
+    <div class="chip" onclick="tog(this,'areas','sales')">Ventas</div>
+    <div class="chip" onclick="tog(this,'areas','support')">Atención al cliente</div>
+    <div class="chip" onclick="tog(this,'areas','ops')">Operaciones</div>
+    <div class="chip" onclick="tog(this,'areas','hr')">RRHH</div>
+    <div class="chip" onclick="tog(this,'areas','admin')">Administración / back office</div>
+    <div class="chip" onclick="tog(this,'areas','management')">Dirección / estrategia</div>
+    <div class="chip" onclick="tog(this,'areas','product')">Producto / innovación</div>
+    <div class="chip" onclick="tog(this,'areas','unclear')">No lo tenemos claro aún</div>
+  </div>
+  <div class="row">
+    <button class="btn btn-outline" onclick="go(1)">Volver</button>
+    <button class="btn btn-green" id="b2" disabled onclick="go(3)">Siguiente</button>
+  </div>
+</div>
+
+<!-- 3: SITUACION IA -->
+<div class="step" id="s3">
+  <div class="tag">03 / 11 - Situación actual</div>
+  <h2>¿Cuál describe mejor la situación actual de vuestra empresa con la IA?</h2>
+  <p class="sub">Esto nos ayuda a distinguir entre curiosidad, pilotos y adopción operativa real.</p>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,'ai_situation','none',0)">
+      <div class="opt-text"><div class="opt-title">No usamos IA actualmente</div><div class="opt-desc">Todavía no forma parte del trabajo habitual.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'ai_situation','individual',0)">
+      <div class="opt-text"><div class="opt-title">Algunas personas la usan por su cuenta</div><div class="opt-desc">Hay uso individual, pero no método compartido.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'ai_situation','pilots',0)">
+      <div class="opt-text"><div class="opt-title">Hemos hecho pruebas o pequeños pilotos</div><div class="opt-desc">Ya hay experimentación, aunque todavía no escala.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'ai_situation','regular',0)">
+      <div class="opt-text"><div class="opt-title">Ya la usamos en algunos procesos de forma regular</div><div class="opt-desc">Existen casos de uso reales en parte de la operativa.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'ai_situation','embedded',0)">
+      <div class="opt-text"><div class="opt-title">La IA forma parte del trabajo habitual de varios equipos</div><div class="opt-desc">Hay adopción transversal y rutinas de uso más maduras.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+  </div>
+  <div class="row">
+    <button class="btn btn-outline" onclick="go(2)">Volver</button>
+    <button class="btn btn-green" id="b3" disabled onclick="go(4)">Siguiente</button>
+  </div>
+</div>
+
+<!-- 4: USUARIOS IA -->
+<div class="step" id="s4">
+  <div class="tag">04 / 11 - Adopción interna</div>
+  <h2>¿Quién está usando IA actualmente dentro de la empresa?</h2>
+  <p class="sub">La adopción real depende tanto de herramientas como de quién las usa y con qué consistencia.</p>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,'ai_users','nobody',0)">
+      <div class="opt-text"><div class="opt-title">Nadie</div><div class="opt-desc">No hay uso activo o visible dentro del equipo.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'ai_users','management',0)">
+      <div class="opt-text"><div class="opt-title">Solo dirección / managers</div><div class="opt-desc">El uso se concentra en perfiles de decisión.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'ai_users','few_people',0)">
+      <div class="opt-text"><div class="opt-title">Solo algunas personas concretas</div><div class="opt-desc">Hay usuarios avanzados, pero no adopción de equipo.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'ai_users','one_department',0)">
+      <div class="opt-text"><div class="opt-title">Un único departamento</div><div class="opt-desc">La adopción está localizada en un área.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'ai_users','several_departments',0)">
+      <div class="opt-text"><div class="opt-title">Varios departamentos</div><div class="opt-desc">Ya existe adopción transversal, aunque puede no estar estandarizada.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'ai_users','company_wide',0)">
+      <div class="opt-text"><div class="opt-title">Prácticamente toda la empresa</div><div class="opt-desc">La IA ya es una capacidad habitual en la organización.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+  </div>
+  <div class="row">
+    <button class="btn btn-outline" onclick="go(3)">Volver</button>
+    <button class="btn btn-green" id="b4" disabled onclick="go(5)">Siguiente</button>
+  </div>
+</div>
+
+<!-- 5: HERRAMIENTAS -->
+<div class="step" id="s5">
+  <div class="tag">05 / 11 - Herramientas</div>
+  <h2>¿Qué herramientas de IA utilizáis hoy?</h2>
+  <p class="sub">Selecciona las herramientas usadas de verdad. Si no usáis ninguna, marca solo esa opción.</p>
+  <div class="chips" id="chips-ai-tools">
+    <div class="chip" onclick="tog(this,'ai_tools','chatgpt')">ChatGPT</div>
+    <div class="chip" onclick="tog(this,'ai_tools','copilot')">Microsoft Copilot</div>
+    <div class="chip" onclick="tog(this,'ai_tools','gemini')">Gemini</div>
+    <div class="chip" onclick="tog(this,'ai_tools','claude')">Claude</div>
+    <div class="chip" onclick="tog(this,'ai_tools','canva')">Canva / herramientas creativas con IA</div>
+    <div class="chip" onclick="tog(this,'ai_tools','automations')">Automatizaciones con IA</div>
+    <div class="chip" onclick="tog(this,'ai_tools','specific')">Otras herramientas específicas</div>
+    <div class="chip" onclick="tog(this,'ai_tools','none')">No usamos ninguna</div>
+  </div>
+  <div class="row">
+    <button class="btn btn-outline" onclick="go(4)">Volver</button>
+    <button class="btn btn-green" id="b5" disabled onclick="go(6)">Siguiente</button>
+  </div>
+</div>
+
+<!-- 6: TAREAS -->
+<div class="step" id="s6">
+  <div class="tag">06 / 11 - Fricciones</div>
+  <h2>¿Qué tareas os consumen más tiempo y podrían mejorarse con IA?</h2>
+  <p class="sub">Selecciona las fricciones más visibles. Aquí sale buena parte de la personalización del diagnóstico.</p>
+  <div class="chips" id="chips-tasks">
+    <div class="chip" onclick="tog(this,'tasks','writing')">Redacción de contenidos o documentos</div>
+    <div class="chip" onclick="tog(this,'tasks','analysis')">Análisis de información / datos</div>
+    <div class="chip" onclick="tog(this,'tasks','reports')">Presentaciones, resúmenes o reportes</div>
+    <div class="chip" onclick="tog(this,'tasks','customer_replies')">Atención a clientes / respuestas repetitivas</div>
+    <div class="chip" onclick="tog(this,'tasks','admin')">Tareas administrativas</div>
+    <div class="chip" onclick="tog(this,'tasks','sales_prospecting')">Prospección comercial / ventas</div>
+    <div class="chip" onclick="tog(this,'tasks','coordination')">Organización y coordinación interna</div>
+    <div class="chip" onclick="tog(this,'tasks','training_docs')">Formación / documentación interna</div>
+    <div class="chip" onclick="tog(this,'tasks','unclear')">No lo tenemos claro todavía</div>
+  </div>
+  <div class="row">
+    <button class="btn btn-outline" onclick="go(5)">Volver</button>
+    <button class="btn btn-green" id="b6" disabled onclick="go(7)">Siguiente</button>
+  </div>
+</div>
+
+<!-- 7: HORAS PERDIDAS -->
+<div class="step" id="s7">
+  <div class="tag">07 / 11 - Tiempo recuperable</div>
+  <h2>¿Cuántas horas perdéis a la semana en tareas repetitivas que podrían automatizarse con IA?</h2>
+  <p class="sub">No hace falta que sea exacto. Una estimación honesta nos ayuda a calcular potencial, prioridad y retorno con más criterio.</p>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,'usage','0_5',0)">
+      <div class="opt-text"><div class="opt-title">0 - 5 horas / semana</div><div class="opt-desc">Hay fricción, pero todavía no parece crítica.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'usage','5_10',0)">
+      <div class="opt-text"><div class="opt-title">5 - 10 horas / semana</div><div class="opt-desc">Ya existe margen claro para liberar tiempo operativo.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'usage','10_15',0)">
+      <div class="opt-text"><div class="opt-title">10 - 15 horas / semana</div><div class="opt-desc">La automatización puede tener impacto visible en semanas.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'usage','15_25',0)">
+      <div class="opt-text"><div class="opt-title">15 - 25 horas / semana</div><div class="opt-desc">Probablemente hay procesos repetitivos que conviene priorizar ya.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'usage','25_40',0)">
+      <div class="opt-text"><div class="opt-title">25 - 40 horas / semana</div><div class="opt-desc">El coste oculto ya puede justificar un plan de implantación más serio.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+    <div class="opt" onclick="pick(this,'usage','40_plus',0)">
+      <div class="opt-text"><div class="opt-title">Más de 40 horas / semana</div><div class="opt-desc">Hay una oportunidad clara de rediseñar procesos y no solo formar al equipo.</div></div>
+      <div class="opt-radio"></div>
+    </div>
+  </div>
+  <div class="row">
+    <button class="btn btn-outline" onclick="go(6)">Volver</button>
+    <button class="btn btn-green" id="b7" disabled onclick="go(8)">Siguiente</button>
+  </div>
+</div>
+
+<!-- 8: BLOQUEADORES -->
+<div class="step" id="s8">
+  <div class="tag">08 / 11 - Bloqueadores</div>
+  <h2>¿Qué os está frenando más ahora mismo para avanzar con IA?</h2>
+  <p class="sub">Selecciona todos los bloqueadores relevantes. Esto ayuda a que el plan sea realista, no solo ambicioso.</p>
+  <div class="chips" id="chips-blockers">
+    <div class="chip" onclick="tog(this,'blockers','start')">No sabemos por dónde empezar</div>
+    <div class="chip" onclick="tog(this,'blockers','training')">Falta de formación del equipo</div>
+    <div class="chip" onclick="tog(this,'blockers','time')">Falta de tiempo</div>
+    <div class="chip" onclick="tog(this,'blockers','strategy')">Falta de estrategia clara</div>
+    <div class="chip" onclick="tog(this,'blockers','tools')">Dudas sobre herramientas</div>
+    <div class="chip" onclick="tog(this,'blockers','privacy')">Dudas sobre privacidad / seguridad</div>
+    <div class="chip" onclick="tog(this,'blockers','use_cases')">No vemos aún casos de uso claros</div>
+    <div class="chip" onclick="tog(this,'blockers','leadership')">Falta de apoyo interno / liderazgo</div>
+    <div class="chip" onclick="tog(this,'blockers','budget')">Presupuesto limitado</div>
+  </div>
+  <div class="row">
+    <button class="btn btn-outline" onclick="go(7)">Volver</button>
+    <button class="btn btn-green" id="b8" disabled onclick="go(9)">Siguiente</button>
+  </div>
+</div>
+
+<!-- 9: PRIORIDAD -->
+<div class="step" id="s9">
+  <div class="tag">09 / 11 - Prioridad</div>
+  <h2>Si tuvierais que empezar por una sola prioridad, ¿cuál sería?</h2>
+  <p class="sub">Esta respuesta nos ayuda a elegir el “primer movimiento” más útil para vuestra situación.</p>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,'priority','training',0)"><div class="opt-text"><div class="opt-title">Formar al equipo</div><div class="opt-desc">Crear criterio y capacidad interna antes de escalar.</div></div><div class="opt-radio"></div></div>
+    <div class="opt" onclick="pick(this,'priority','use_cases',0)"><div class="opt-text"><div class="opt-title">Detectar casos de uso concretos</div><div class="opt-desc">Identificar dónde aplicar IA con más impacto y menos ruido.</div></div><div class="opt-radio"></div></div>
+    <div class="opt" onclick="pick(this,'priority','automate',0)"><div class="opt-text"><div class="opt-title">Automatizar tareas</div><div class="opt-desc">Convertir fricciones repetitivas en flujos más ágiles.</div></div><div class="opt-radio"></div></div>
+    <div class="opt" onclick="pick(this,'priority','personal_productivity',0)"><div class="opt-text"><div class="opt-title">Mejorar productividad individual</div><div class="opt-desc">Ayudar a cada persona a trabajar mejor con IA.</div></div><div class="opt-radio"></div></div>
+    <div class="opt" onclick="pick(this,'priority','department_roadmap',0)"><div class="opt-text"><div class="opt-title">Crear un roadmap por departamentos</div><div class="opt-desc">Ordenar iniciativas por área, impacto y viabilidad.</div></div><div class="opt-radio"></div></div>
+    <div class="opt" onclick="pick(this,'priority','tools',0)"><div class="opt-text"><div class="opt-title">Elegir herramientas adecuadas</div><div class="opt-desc">Decidir qué usar sin cambiar el stack por impulso.</div></div><div class="opt-radio"></div></div>
+    <div class="opt" onclick="pick(this,'priority','adoption_strategy',0)"><div class="opt-text"><div class="opt-title">Diseñar una estrategia de adopción interna</div><div class="opt-desc">Alinear liderazgo, procesos y hábitos del equipo.</div></div><div class="opt-radio"></div></div>
+  </div>
+  <div class="row">
+    <button class="btn btn-outline" onclick="go(8)">Volver</button>
+    <button class="btn btn-green" id="b9" disabled onclick="go(10)">Siguiente</button>
+  </div>
+</div>
+
+<!-- 10: RESULTADO DESEADO -->
+<div class="step" id="s10">
+  <div class="tag">10 / 11 - Resultado esperado</div>
+  <h2>¿Qué resultado te gustaría conseguir en los próximos 90 días gracias a la IA?</h2>
+  <p class="sub">Una respuesta corta hace que el diagnóstico sea mucho más concreto y accionable.</p>
+  <div class="field">
+    <label class="flabel">Resultado deseado</label>
+    <textarea id="foutcome" placeholder="Ej.: Ahorrar 10 horas semanales, mejorar la productividad del equipo de marketing, detectar 3 procesos automatizables, formar al equipo comercial..." oninput="chkOutcome()"></textarea>
+  </div>
+  <div class="row">
+    <button class="btn btn-outline" onclick="go(9)">Volver</button>
+    <button class="btn btn-green" id="b10" disabled onclick="go(11)">Siguiente</button>
+  </div>
+</div>
+
+<!-- 11: CONTACTO -->
+<div class="step" id="s11">
+  <div class="tag">11 / 11 - Tus datos</div>
+  <h2>Desbloquea tu diagnóstico ejecutivo</h2>
+  <p class="sub">Usaremos estos datos para ajustar el diagnóstico a tu rol, tamaño de empresa y contexto real.</p>
+  <div class="field"><label class="flabel">Nombre</label><input type="text" id="fname" placeholder="Tu nombre" oninput="chkForm()"></div>
+  <div class="field"><label class="flabel">Email profesional</label><input type="email" id="femail" placeholder="tu@empresa.com" oninput="chkForm()"></div>
+  <div class="field"><label class="flabel">Teléfono <span style="color:var(--w3)">(opcional)</span></label><input type="tel" id="fphone" placeholder="+34 600 000 000" oninput="chkForm()"></div>
+  <div class="field"><label class="flabel">Empresa</label><input type="text" id="fcompany" placeholder="Nombre de tu empresa" oninput="chkForm()"></div>
+  <div class="field"><label class="flabel">Cargo</label><input type="text" id="frole" placeholder="Ej.: CEO, Directora de Marketing, COO..." oninput="chkForm()"></div>
+  <div class="field"><label class="flabel">Nº de empleados</label><input type="text" id="femployees" placeholder="Ej.: 12, 35, 120..." oninput="chkForm()"></div>
+  <label class="check-field">
+    <input type="checkbox" id="fprivacy" onchange="chkForm()">
+    <span class="check-copy">Acepto las condiciones de uso y política de privacidad <span style="color:var(--g)">*</span></span>
+  </label>
+  <label class="check-field">
+    <input type="checkbox" id="fcomms">
+    <span class="check-copy">Acepto recibir comunicaciones promocionales relacionadas con productos, servicios o actividades.</span>
+  </label>
+  <button class="btn btn-green btn-full" id="bsubmit" disabled onclick="runAnalysis()">Generar mi diagnóstico con IA</button>
+  <p class="fnote">Te mostraremos el diagnóstico en pantalla y podremos enviarte recomendaciones relacionadas. Sin spam.</p>
+</div>
+
+<!-- LOADING -->
+<div class="step" id="s-loading" style="min-height:100vh;align-items:center;justify-content:center;text-align:center">
+  <div>
+    <div class="load-num" id="load-pct">0%</div>
+    <div class="load-sub">Analizando tu empresa</div>
+    <div class="load-bar"></div>
+    <div class="load-msg" id="load-msg">Procesando datos del sector...</div>
+  </div>
+</div>
+
+<!-- FOLLOW-UP -->
+<div class="step" id="s-followup" style="min-height:auto">
+  <div class="followup-card">
+    <div class="tag">Afinar el diagnóstico</div>
+    <h2>Necesitamos unas respuestas más para personalizar el informe.</h2>
+    <p class="followup-help">Estas preguntas aparecen solo cuando la IA detecta que puede darte una evaluación mucho más útil y accionable para tu empresa.</p>
+    <div class="followup-wrap" id="followup-fields"></div>
+    <div class="followup-actions" style="margin-top:10px">
+      <button class="btn btn-outline" onclick="go(11)">Volver</button>
+      <button class="btn btn-green" id="b-followup" disabled onclick="submitFollowup()">Actualizar diagnóstico</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="step" id="s-results" style="padding-top:52px;padding-bottom:52px;min-height:auto"></div>
+
+</div><!-- /app -->
+
+<script>
+const S = {
+  cur: 0,
+  a: {},
+  chips: {},
+  gpt: null,
+  followup: [],
+  followupAnswers: {},
+  lastPostedHeight: 0
+};
+const TOTAL = 11;
+const ANALYZE_ENDPOINT = '/analyze';
+const APP_URLS = {
+  courses: 'https://www.sixminds.com/empresas',
+  calendly: 'https://calendly.com/andrea-munoz-planetaformacion/reunion-con-sixminds'
+};
+const ACTIVE_FORM_TAGS = /^(INPUT|TEXTAREA|SELECT)$/;
+
+const OBJECTIVE_MAP = {
+  save_time: 'Ahorrar tiempo en tareas repetitivas',
+  productivity: 'Mejorar la productividad del equipo',
+  reduce_costs: 'Reducir costes operativos',
+  sales_leads: 'Generar más ventas o leads',
+  quality: 'Mejorar la calidad del trabajo',
+  customer_service: 'Mejorar la atención al cliente',
+  speed_processes: 'Acelerar procesos internos',
+  explore: 'Explorar oportunidades sin objetivo claro'
+};
+
+const AREA_MAP = {
+  marketing: 'Marketing',
+  sales: 'Ventas',
+  support: 'Atención al cliente',
+  ops: 'Operaciones',
+  hr: 'RRHH',
+  admin: 'Administración / back office',
+  management: 'Dirección / estrategia',
+  product: 'Producto / innovación',
+  unclear: 'No lo tenemos claro aún'
+};
+
+const AI_SITUATION_MAP = {
+  none: 'No usamos IA actualmente',
+  individual: 'Algunas personas la usan por su cuenta',
+  pilots: 'Hemos hecho pruebas o pequeños pilotos',
+  regular: 'Ya la usamos en algunos procesos de forma regular',
+  embedded: 'La IA forma parte del trabajo habitual de varios equipos'
+};
+
+const AI_USERS_MAP = {
+  nobody: 'Nadie',
+  management: 'Solo dirección / managers',
+  few_people: 'Solo algunas personas concretas',
+  one_department: 'Un único departamento',
+  several_departments: 'Varios departamentos',
+  company_wide: 'Prácticamente toda la empresa'
+};
+
+const AI_TOOL_MAP = {
+  chatgpt: 'ChatGPT',
+  copilot: 'Microsoft Copilot',
+  gemini: 'Gemini',
+  claude: 'Claude',
+  canva: 'Canva / herramientas creativas con IA',
+  automations: 'Automatizaciones con IA',
+  specific: 'Otras herramientas específicas',
+  none: 'No usamos ninguna'
+};
+
+const TASK_MAP = {
+  writing: 'Redacción de contenidos o documentos',
+  analysis: 'Análisis de información / datos',
+  reports: 'Presentaciones, resúmenes o reportes',
+  customer_replies: 'Atención a clientes / respuestas repetitivas',
+  admin: 'Tareas administrativas',
+  sales_prospecting: 'Prospección comercial / ventas',
+  coordination: 'Organización y coordinación interna',
+  training_docs: 'Formación / documentación interna',
+  unclear: 'No lo tenemos claro todavía'
+};
+
+const USAGE_MAP = {
+  '0_5': '0 - 5 horas / semana',
+  '5_10': '5 - 10 horas / semana',
+  '10_15': '10 - 15 horas / semana',
+  '15_25': '15 - 25 horas / semana',
+  '25_40': '25 - 40 horas / semana',
+  '40_plus': 'Más de 40 horas / semana'
+};
+
+const BLOCKER_MAP = {
+  start: 'No sabemos por dónde empezar',
+  training: 'Falta de formación del equipo',
+  time: 'Falta de tiempo',
+  strategy: 'Falta de estrategia clara',
+  tools: 'Dudas sobre herramientas',
+  privacy: 'Dudas sobre privacidad / seguridad',
+  use_cases: 'No vemos aún casos de uso claros',
+  leadership: 'Falta de apoyo interno / liderazgo',
+  budget: 'Presupuesto limitado'
+};
+
+const PRIORITY_MAP = {
+  training: 'Formar al equipo',
+  use_cases: 'Detectar casos de uso concretos',
+  automate: 'Automatizar tareas',
+  personal_productivity: 'Mejorar productividad individual',
+  department_roadmap: 'Crear un roadmap por departamentos',
+  tools: 'Elegir herramientas adecuadas',
+  adoption_strategy: 'Diseñar una estrategia de adopción interna'
+};
+
+const COURSE_URLS = {
+  'Automatizaciones con IA': 'https://www.sixminds.com/curso-automatizaciones-con-ia',
+  'IA para Marketing': 'https://www.sixminds.com/curso-ia-para-marketing',
+  'IA Generativa para Imagen y Video': 'https://www.sixminds.com/curso-ia-generativa-visual',
+  'IA para crear Aplicaciones Web': 'https://www.sixminds.com/curso-especializado-aplicaciones-web',
+  'Productividad con IA para RRHH': 'https://www.sixminds.com/curso-especializado-en-productividad-de-la-inteligencia-artificial-para-rhh'
+};
+const COURSE_NAMES = Object.keys(COURSE_URLS);
+
+const STEP_REQUIREMENTS = {
+  1: ['objective'],
+  2: ['areas'],
+  3: ['ai_situation'],
+  4: ['ai_users'],
+  5: ['ai_tools'],
+  6: ['tasks'],
+  7: ['usage'],
+  8: ['blockers'],
+  9: ['priority']
+};
+
+function go(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('on'));
+  const map = { loading: 's-loading', results: 's-results', followup: 's-followup' };
+  const id = map[n] || ('s' + n);
+  document.getElementById(id).classList.add('on');
+  S.cur = typeof n === 'number' ? n : n;
+  updateProg();
+  trackEvent('diagnostico_step_view', { step: S.cur });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  sendH();
+}
+
+function updateProg() {
+  const n = S.cur;
+  const pct = n === 0 ? 1 : (typeof n === 'number' && n <= TOTAL) ? Math.round((n / TOTAL) * 100) : 100;
+  document.getElementById('pb').style.width = pct + '%';
+  const pl = document.getElementById('pl');
+  if (typeof n === 'number' && n >= 1 && n <= TOTAL) {
+    pl.style.display = 'block';
+    pl.textContent = n + ' / ' + TOTAL;
+  } else {
+    pl.style.display = 'none';
+  }
+}
+
+function pick(el, key, val, num) {
+  el.closest('.opts').querySelectorAll('.opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  S.a[key] = { val, num };
+  refreshStepButton();
+}
+
+function gpick(el, key, val, num) {
+  el.closest('.grid').querySelectorAll('.gcard').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  S.a[key] = { val, num: num || 0 };
+  refreshStepButton();
+}
+
+function refreshStepButton(step = S.cur) {
+  const b = document.getElementById('b' + step);
+  if (!b) return;
+  const req = STEP_REQUIREMENTS[step];
+  if (!req) {
+    b.disabled = false;
+    return;
+  }
+  b.disabled = !req.every(key => {
+    if (S.chips[key]) return !!S.chips[key].size;
+    return !!(S.a[key] && S.a[key].val);
+  });
+}
+
+function tog(el, group, val, maxSel) {
+  if (!S.chips[group]) S.chips[group] = new Set();
+  const set = S.chips[group];
+  const exclusiveValues = {
+    areas: ['unclear'],
+    ai_tools: ['none'],
+    tasks: ['unclear']
+  };
+  const exclusive = exclusiveValues[group] || [];
+  const all = [...el.closest('.chips').querySelectorAll('.chip')];
+
+  if (exclusive.includes(val)) {
+    all.forEach(chip => chip.classList.remove('sel'));
+    set.clear();
+    el.classList.add('sel');
+    set.add(val);
+    refreshStepButton();
+    return;
+  }
+
+  exclusive.forEach(item => {
+    if (set.has(item)) {
+      set.delete(item);
+      all.forEach(chip => {
+        if (chip.textContent.trim() === (AREA_MAP[item] || AI_TOOL_MAP[item] || TASK_MAP[item])) chip.classList.remove('sel');
+      });
+    }
+  });
+
+  if (set.size && exclusive.some(item => set.has(item))) {
+    set.clear();
+    all.forEach(chip => chip.classList.remove('sel'));
+  }
+
+  if (el.classList.contains('sel')) {
+    el.classList.remove('sel');
+    set.delete(val);
+  } else {
+    if (maxSel && set.size >= maxSel) return;
+    el.classList.add('sel');
+    set.add(val);
+  }
+  refreshStepButton();
+}
+
+function chkOutcome() {
+  const b = document.getElementById('b10');
+  if (b) b.disabled = fieldValue('foutcome').length < 4;
+}
+
+function chkForm() {
+  const n = fieldValue('fname');
+  const c = fieldValue('fcompany');
+  const e = fieldValue('femail');
+  const phone = fieldValue('fphone');
+  const role = fieldValue('frole');
+  const employees = fieldValue('femployees');
+  const p = document.getElementById('fprivacy').checked;
+  document.getElementById('bsubmit').disabled = !(n && c && role && employees && p && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+}
+
+function chkFollowup() {
+  const ready = S.followup.every(q => {
+    const el = document.getElementById(`followup-${q.id}`);
+    return el && el.value.trim();
+  });
+  document.getElementById('b-followup').disabled = !ready;
+}
+
+function buildAnalyzePayload() {
+  return {
+    answers: Object.fromEntries(
+      Object.entries(S.a).map(([key, value]) => [key, value?.val ?? value])
+    ),
+    chips: Object.fromEntries(
+      Object.entries(S.chips).map(([key, value]) => [key, [...value]])
+    ),
+    contact: {
+      name: fieldValue('fname'),
+      company: fieldValue('fcompany'),
+      email: fieldValue('femail'),
+      phone: fieldValue('fphone'),
+      role: fieldValue('frole'),
+      employees: fieldValue('femployees'),
+      comms: !!document.getElementById('fcomms')?.checked
+    },
+    desiredOutcome: fieldValue('foutcome'),
+    followupAnswers: { ...S.followupAnswers }
+  };
+}
+
+function serializePayload(payload, metrics) {
+  const answers = payload.answers || {};
+  const chips = payload.chips || {};
+  const contact = payload.contact || {};
+  return [
+    `Empresa: ${contact.company || 'No indicada'}`,
+    `Contacto: ${contact.name || 'No indicado'} - ${contact.role || 'Cargo no indicado'}`,
+    `Email: ${contact.email || 'No indicado'}`,
+    `Telefono: ${contact.phone || 'No indicado'}`,
+    `Numero de empleados: ${contact.employees || 'No indicado'}`,
+    `Objetivo IA 6-12 meses: ${OBJECTIVE_MAP[answers.objective] || 'No indicado'}`,
+    `Areas de impacto: ${(chips.areas || []).map(item => AREA_MAP[item] || item).join(', ') || 'No indicado'}`,
+    `Situacion actual IA: ${AI_SITUATION_MAP[answers.ai_situation] || 'No indicado'}`,
+    `Quien usa IA: ${AI_USERS_MAP[answers.ai_users] || 'No indicado'}`,
+    `Herramientas IA: ${(chips.ai_tools || []).map(item => AI_TOOL_MAP[item] || item).join(', ') || 'No indicado'}`,
+    `Tareas que consumen mas tiempo: ${(chips.tasks || []).map(item => TASK_MAP[item] || item).join(', ') || 'No indicado'}`,
+    `Horas semanales perdidas en tareas repetitivas automatizables: ${USAGE_MAP[answers.usage] || 'No indicado'}`,
+    `Bloqueadores: ${(chips.blockers || []).map(item => BLOCKER_MAP[item] || item).join(', ') || 'No indicado'}`,
+    `Prioridad de arranque: ${PRIORITY_MAP[answers.priority] || 'No indicada'}`,
+    `Resultado deseado en 90 dias: ${payload.desiredOutcome || 'No indicado'}`,
+    `Equipo impactado estimado: ${metrics.impactedTeam}`,
+    `Horas perdidas estimadas: ${metrics.totalH}`,
+    `Coste oculto anual estimado: EUR ${metrics.moneyL}`,
+    `Ahorro anual priorizable: EUR ${metrics.mSaved}`,
+    payload.followupAnswers && Object.keys(payload.followupAnswers).length
+      ? `Respuestas adicionales:\n${Object.entries(payload.followupAnswers).map(([k, v]) => `- ${k}: ${v}`).join('\n')}`
+      : ''
+  ].filter(Boolean).join('\n');
+}
+
+function extractJson(raw) {
+  const text = String(raw || '').replace(/```json|```/gi, '').trim();
+  if (!text) throw new Error('empty_openai_response');
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    const match = text.match(/\{[\s\S]*\}$/);
+    if (match) return JSON.parse(match[0]);
+    throw error;
+  }
+}
+
+async function askOpenAI(payload) {
+  const response = await fetch(ANALYZE_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '');
+    throw new Error(`analyze_http_${response.status}${detail ? `:${detail}` : ''}`);
+  }
+
+  return response.json();
+}
+
+function calcMetrics() {
+  const situationScoreMap = { none: 14, individual: 28, pilots: 44, regular: 62, embedded: 76 };
+  const lostHoursScoreMap = { '0_5': 2, '5_10': 5, '10_15': 8, '15_25': 12, '25_40': 16, '40_plus': 18 };
+  const lostHoursMidMap = { '0_5': 2.5, '5_10': 7.5, '10_15': 12.5, '15_25': 20, '25_40': 32.5, '40_plus': 48 };
+  const userScoreMap = { nobody: 0, management: 4, few_people: 8, one_department: 12, several_departments: 18, company_wide: 24 };
+  const situationHoursMap = { none: 4.2, individual: 3.4, pilots: 2.7, regular: 1.9, embedded: 1.25 };
+  const savingsMap = { none: 0.26, individual: 0.24, pilots: 0.21, regular: 0.17, embedded: 0.13 };
+  const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, unclear: 0.26 };
+
+  const rawEmployees = Number(fieldValue('femployees').replace(/[^\d]/g, ''));
+  const team = Math.max(1, Math.min(500, rawEmployees || 12));
+  const revenue = 1250000;
+  const areas = [...(S.chips.areas || [])];
+  const tasks = [...(S.chips.tasks || [])];
+  const blockers = [...(S.chips.blockers || [])];
+  const tools = [...(S.chips.ai_tools || [])];
+  const mainArea = areas.find(area => area !== 'unclear') || 'ops';
+  const taskCount = Math.max(1, tasks.filter(item => item !== 'unclear').length || 1);
+  const blockerCount = Math.max(1, blockers.length || 1);
+  const toolCount = tools.includes('none') ? 0 : tools.length;
+  const hourlyCost = team <= 10 ? 24 : team <= 50 ? 31 : 38;
+  const impactedShare = areaCoverage[mainArea] || 0.3;
+  const impactedTeam = Math.max(2, Math.min(team, Math.round(team * impactedShare)));
+  const blockerFactor = 1 + Math.min(0.24, (blockerCount - 1) * 0.06);
+  const declaredWeeklyHours = lostHoursMidMap[S.a.usage?.val];
+  const modeledWeeklyHours = (situationHoursMap[S.a.ai_situation?.val] || 3.4) * impactedTeam * blockerFactor * (1 + (taskCount - 1) * 0.07);
+  const weeklyHours = declaredWeeklyHours || modeledWeeklyHours;
+  const hrs = weeklyHours / Math.max(1, impactedTeam);
+  const scoreRaw =
+    (situationScoreMap[S.a.ai_situation?.val] || 28) +
+    (lostHoursScoreMap[S.a.usage?.val] || 0) +
+    (userScoreMap[S.a.ai_users?.val] || 0) +
+    Math.min(toolCount * 2, 10) -
+    Math.min(blockerCount * 3, 14) +
+    (team > 40 ? 3 : 0) -
+    (S.a.objective?.val === 'explore' ? 4 : 0);
+  const score = Math.max(8, Math.min(92, Math.round(scoreRaw)));
+  const totalH = Math.round(weeklyHours * 48);
+  const moneyL = Math.round(totalH * hourlyCost);
+  const saveRate = savingsMap[S.a.ai_situation?.val] || 0.24;
+  const hSaved = Math.round(totalH * saveRate);
+  const mSaved = Math.round(moneyL * saveRate);
+  const revenueAtRisk = Math.round(Math.min(revenue * 0.18, moneyL * 1.35));
+  const roi12m = Math.round(mSaved * 1.55);
+  const benchmark =
+    score < 30
+      ? { label: 'Por debajo del punto de partida habitual', note: 'Hace falta priorizar un primer caso de uso, ownership y una implantación guiada para capturar valor rápido.' }
+      : score < 55
+        ? { label: 'Transición activa', note: 'Ya existe interés y algo de base, pero aún faltan foco ejecutivo, adopción y criterio de escalado.' }
+        : score < 75
+          ? { label: 'Por encima de la media', note: 'La empresa ya muestra madurez real. El siguiente salto pasa por orquestación, reporting y extensión a más áreas.' }
+          : { label: 'Madurez avanzada', note: 'La siguiente capa ya no es descubrir la IA, sino gobernarla, medirla y escalarla con más control.' };
+  return {
+    team,
+    impactedTeam,
+    hrs: Math.round(hrs * 10) / 10,
+    score,
+    totalH,
+    moneyL,
+    hSaved,
+    mSaved,
+    hourlyCost,
+    revenue,
+    revenueAtRisk,
+    roi12m,
+    saveRate,
+    benchmark
+  };
+}
+
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[ch]);
+}
+
+function cleanText(value) {
+  return String(value ?? '');
+}
+
+function fieldValue(id) {
+  return document.getElementById(id)?.value.trim() || '';
+}
+
+function companyName(fallback = 'tu empresa') {
+  return fieldValue('fcompany') || fallback;
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = cleanText(value);
+}
+
+function setDisabled(ids, disabled) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = disabled;
+  });
+}
+
+function priorityHorizonLabel(priority) {
+  if (priority?.horizon) return cleanText(priority.horizon);
+  if (priority?.weeks) return `${priority.weeks} semanas`;
+  return '';
+}
+
+function isFormFieldFocused() {
+  const active = document.activeElement;
+  return !!(active && ACTIVE_FORM_TAGS.test(active.tagName));
+}
+
+function openExternal(url) {
+  window.open(url, '_blank', 'noopener');
+}
+
+function updateCtaButtons(cta) {
+  ['r-primary-cta', 'r-primary-cta-secondary'].forEach(id => setText(id, cta.primary));
+  ['r-secondary-cta', 'r-secondary-cta-secondary'].forEach(id => setText(id, cta.secondary));
+}
+
+function trackEvent(name, detail = {}) {
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: name, ...detail });
+}
+
+async function runAnalysis(forceFinal = false) {
+  go('loading');
+  const msgs = [
+    'Procesando objetivos y contexto...',
+    'Evaluando madurez tecnológica...',
+    'Calculando potencial de ahorro...',
+    'Buscando mejoras específicas para la empresa...',
+    'Definiendo tareas, herramientas y roadmap...',
+    'Finalizando informe...'
+  ];
+  let mi = 0;
+  const msgEl = document.getElementById('load-msg');
+  const pctEl = document.getElementById('load-pct');
+  let pct = 0;
+  const interval = setInterval(() => {
+    pct = Math.min(pct + Math.random() * 12, 95);
+    pctEl.textContent = Math.round(pct) + '%';
+    if (mi < msgs.length - 1 && pct > (mi + 1) * 16) {
+      mi++;
+      msgEl.textContent = msgs[mi];
+    }
+  }, 600);
+
+  let data;
+  try {
+    const payload = buildAnalyzePayload();
+    payload.forceFinal = forceFinal;
+    data = await askOpenAI(payload);
+    trackEvent('diagnostico_analysis_success', { source: data.source || 'server' });
+  } catch (e) {
+    console.error('Server analysis failed:', e);
+    trackEvent('diagnostico_analysis_fallback', { reason: e.message || 'unknown' });
+    data = fallback();
+  } finally {
+    clearInterval(interval);
+    pctEl.textContent = '100%';
+  }
+
+  if (data?.needs_followup && Array.isArray(data.questions) && data.questions.length && !forceFinal) {
+    S.followup = data.questions.slice(0, 3);
+    renderFollowup();
+    go('followup');
+    return;
+  }
+
+  S.gpt = { ...fallback(), ...data, needs_followup: false, questions: [] };
+  setTimeout(() => renderResults(S.gpt), 300);
+}
+
+function renderFollowup() {
+  const wrap = document.getElementById('followup-fields');
+  wrap.innerHTML = S.followup.map(q => `
+    <div class="field">
+      <label class="flabel">${esc(q.label)}</label>
+      <textarea id="followup-${esc(q.id)}" placeholder="${esc(q.placeholder || '')}" oninput="chkFollowup()"></textarea>
+      <p class="fnote">${esc(q.why || 'Tu respuesta mejora la precisión del informe.')}</p>
+    </div>
+  `).join('');
+  document.getElementById('b-followup').disabled = true;
+  sendH();
+}
+
+function submitFollowup() {
+  S.followupAnswers = {};
+  S.followup.forEach(q => {
+    const value = document.getElementById(`followup-${q.id}`).value.trim();
+    S.followupAnswers[q.label] = value;
+  });
+  runAnalysis(true);
+}
+
+function fallback() {
+  const c = calcMetrics();
+  const tasks = [...(S.chips.tasks || [])];
+  const areas = [...(S.chips.areas || [])];
+  const firstTask = TASK_MAP[tasks.find(task => task !== 'unclear')] || PRIORITY_MAP[S.a.priority?.val] || 'Proceso prioritario';
+  return {
+    source: 'fallback',
+    needs_followup: false,
+    questions: [],
+    headline: 'Base clara para activar IA con criterio y retorno medible',
+    summary: `La empresa muestra una madurez de ${c.score}/100. El objetivo principal es ${OBJECTIVE_MAP[S.a.objective?.val] || 'activar IA con criterio'}, con foco probable en ${areas.map(item => AREA_MAP[item]).filter(Boolean).join(', ') || 'las áreas con mayor fricción'}. El resultado deseado a 90 días debe convertirse en un primer caso de uso medible.`,
+    score: c.score,
+    benchmark: c.benchmark,
+    best_first_move: {
+      title: 'Lanzar un quick win operativo medible',
+      process: firstTask,
+      why: 'Es el camino más rápido para demostrar valor, reducir fricción y generar confianza interna.',
+      first_action: 'Definir baseline, owner y alcance de un piloto de 30 días.',
+      expected_effect: 'Menos trabajo manual y una métrica clara para decidir si escalar.'
+    },
+    priorities: [
+      {
+        title: 'Activar un primer caso de uso con retorno visible',
+        body: 'Elegid un proceso con fricción operativa real y volumen suficiente para demostrar ahorro, velocidad o mejor servicio sin dispersar al equipo.',
+        impact: 'Alto',
+        horizon: '30d',
+        why_now: 'Porque hace falta una victoria temprana que demuestre retorno y reduzca la percepción de riesgo antes de ampliar el alcance.'
+      },
+      {
+        title: 'Definir ownership, métricas y criterio de priorización',
+        body: 'Antes de escalar herramientas, hace falta un responsable claro, una métrica de éxito y una secuencia de implantación que evite experimentos sueltos.',
+        impact: 'Alto',
+        horizon: '60d',
+        why_now: 'Porque sin ownership ni métricas la implantación se fragmenta y el equipo termina probando herramientas sin continuidad operativa.'
+      },
+      {
+        title: 'Estandarizar método, adopción y formación del equipo',
+        body: 'La implantación tendrá más recorrido si el equipo entiende el stack, los prompts y la operativa esperada desde el principio.',
+        impact: 'Medio',
+        horizon: '90d',
+        why_now: 'Porque la adopción sostenida depende de que el equipo comparta método, criterios de uso y una forma común de ejecutar.'
+      }
+    ],
+    roadmap: [
+      { phase: '30 días', title: 'Aterrizar la oportunidad', actions: ['Elegir un área prioritaria', 'Definir baseline y ownership', 'Lanzar un primer quick win'] },
+      { phase: '60 días', title: 'Integrar y ordenar', actions: ['Conectar herramientas clave', 'Estandarizar prompts y SOPs', 'Medir impacto inicial'] },
+      { phase: '90 días', title: 'Escalar con criterio', actions: ['Extender a un segundo caso de uso', 'Revisar ROI y adopción', 'Decidir roadmap de escala'] }
+    ],
+    courses: selectSpecializedCourses(),
+    cta: {}
+  };
+}
+
+function resolveCourseUrl(name, fallbackUrl = APP_URLS.courses) {
+  return COURSE_URLS[name] || fallbackUrl;
+}
+
+function selectSpecializedCourse() {
+  const areas = S.chips.areas ? [...S.chips.areas] : [];
+  const tasks = S.chips.tasks ? [...S.chips.tasks] : [];
+  const blockers = S.chips.blockers ? [...S.chips.blockers] : [];
+  const hasArea = value => areas.includes(value);
+  const hasTask = value => tasks.includes(value);
+  const hasBlocker = value => blockers.includes(value);
+  let name = 'Automatizaciones con IA';
+  let reason = 'Encaja porque el diagnóstico apunta a reducir fricción operativa con flujos concretos, automatización de tareas repetitivas y una implantación práctica sin rediseñar toda la empresa.';
+
+  if (hasArea('hr') || hasTask('training_docs')) {
+    name = 'Productividad con IA para RRHH';
+    reason = 'Es el curso más útil porque la oportunidad principal está en onboarding, documentación interna, formación del equipo y adopción práctica de IA.';
+  } else if (hasArea('marketing') || hasTask('writing')) {
+    name = 'IA para Marketing';
+    reason = 'Encaja porque el frente prioritario toca contenido, campañas, research, conversión o productividad del equipo de marketing.';
+  } else if (hasTask('writing') && (S.a.objective?.val === 'quality' || hasArea('product'))) {
+    name = 'IA Generativa para Imagen y Video';
+    reason = 'Tiene sentido cuando la mejora buscada pasa por acelerar producción creativa, activos visuales y entregables de mayor calidad.';
+  } else if (hasArea('product') || hasBlocker('tools') || hasTask('admin')) {
+    name = 'IA para crear Aplicaciones Web';
+    reason = 'Es útil si el caso apunta a prototipar herramientas internas, interfaces o aplicaciones ligeras para resolver procesos concretos.';
+  }
+
+  return { name, reason, url: resolveCourseUrl(name) };
+}
+
+function complementaryCourse(primary) {
+  const areas = S.chips.areas ? [...S.chips.areas] : [];
+  const tasks = S.chips.tasks ? [...S.chips.tasks] : [];
+  const hasArea = value => areas.includes(value);
+  const hasTask = value => tasks.includes(value);
+  let name = 'Automatizaciones con IA';
+  let reason = 'Complementa el diagnóstico porque convierte el aprendizaje en flujos concretos, reduce trabajo manual y permite medir impacto operativo con rapidez.';
+
+  if (primary.name === 'Automatizaciones con IA') {
+    if (hasArea('marketing') || hasTask('writing') || hasTask('sales_prospecting')) {
+      name = 'IA para Marketing';
+      reason = 'Complementa la automatización con casos de uso de campañas, contenido, research y conversión para que el equipo active IA en el frente comercial y de demanda.';
+    } else if (hasArea('hr') || hasTask('training_docs')) {
+      name = 'Productividad con IA para RRHH';
+      reason = 'Complementa la automatización con adopción práctica en formación interna, documentación y soporte a managers, donde el equipo puede capturar valor sin complejidad técnica.';
+    } else if (hasArea('product') || hasTask('admin')) {
+      name = 'IA para crear Aplicaciones Web';
+      reason = 'Complementa la automatización con capacidad para prototipar herramientas internas e interfaces ligeras conectadas a procesos reales.';
+    }
+  } else if (primary.name === 'IA para Marketing' && hasTask('writing')) {
+    name = 'IA Generativa para Imagen y Video';
+    reason = 'Refuerza la parte visual y creativa de campañas, ecommerce y producción de activos, que suele ser un cuello de botella cuando marketing quiere escalar con IA.';
+  }
+
+  if (name === primary.name) {
+    name = 'Automatizaciones con IA';
+    reason = 'Complementa el curso principal llevando los casos de uso a flujos repetibles, conectados y medibles dentro de la operativa diaria.';
+  }
+
+  return { name, reason, url: resolveCourseUrl(name) };
+}
+
+function selectSpecializedCourses() {
+  const primary = selectSpecializedCourse();
+  const secondary = complementaryCourse(primary);
+  return [primary, secondary].filter((course, index, list) =>
+    course && list.findIndex(item => item.name === course.name) === index
+  ).slice(0, 2);
+}
+
+function normalizeCourses(data) {
+  const fallbackCourses = selectSpecializedCourses();
+  const raw = Array.isArray(data.courses) ? data.courses : [];
+  const normalized = raw
+    .filter(course => course && COURSE_NAMES.includes(course.name))
+    .map(course => ({
+      name: course.name,
+      reason: course.reason || fallbackCourses.find(item => item.name === course.name)?.reason || 'Formación recomendada para acelerar la implantación.',
+      url: resolveCourseUrl(course.name)
+    }));
+
+  fallbackCourses.forEach(course => {
+    if (normalized.length < 2 && !normalized.some(item => item.name === course.name)) {
+      normalized.push(course);
+    }
+  });
+
+  COURSE_NAMES.forEach(name => {
+    if (normalized.length < 2 && !normalized.some(item => item.name === name)) {
+      normalized.push({
+        name,
+        reason: 'Complementa el plan aportando una capacidad práctica adicional para convertir el diagnóstico en ejecución real.',
+        url: resolveCourseUrl(name)
+      });
+    }
+  });
+
+  return normalized.slice(0, 2);
+}
+
+function getMetricsBundle(data) {
+  return data?.metrics || calcMetrics();
+}
+
+function deriveCta(score) {
+  const priority = S.a.priority?.val || '';
+  const blockers = S.chips.blockers ? [...S.chips.blockers] : [];
+  const strategicNeed = ['department_roadmap', 'adoption_strategy', 'use_cases'].includes(priority) || blockers.some(item => ['strategy', 'leadership', 'use_cases', 'privacy'].includes(item));
+
+  if (strategicNeed || score < 35) {
+    return {
+      primary: 'Programar consulta',
+      secondary: 'Ver cursos',
+      primaryType: 'call',
+      secondaryType: 'course',
+      note: 'Tiene sentido aterrizar prioridades y secuencia antes de invertir tiempo en formación o herramientas.'
+    };
+  }
+
+  return {
+    primary: 'Ver cursos',
+    secondary: 'Programar consulta',
+    primaryType: 'course',
+    secondaryType: 'call',
+    note: 'El siguiente paso natural es convertir el diagnóstico en capacidad práctica del equipo.'
+  };
+}
+
+function ensureResultsShell() {
+  const shell = document.querySelector('#s-results .report-shell');
+  if (shell) return;
+  document.getElementById('s-results').innerHTML = `
+    <div class="report-shell">
+      <div class="report-top">
+        <div class="dashboard-card">
+          <div class="tag" style="justify-content:flex-start">Mejor primer movimiento — <span id="r-company" class="report-company"></span></div>
+          <div class="report-headline" id="r-best-title"></div>
+          <div class="report-summary" id="r-best-copy"></div>
+        </div>
+        <div class="dashboard-card report-score-card">
+          <div class="score-card-top">
+            <svg class="score-svg" width="118" height="118" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(117,251,146,0.12)" stroke-width="7"></circle>
+              <circle id="sarc" cx="55" cy="55" r="48" fill="none" stroke="#75fb92" stroke-width="7" stroke-dasharray="301.6" stroke-dashoffset="301.6" stroke-linecap="round" style="transform:rotate(-90deg);transform-origin:55px 55px;transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1)"></circle>
+              <text x="55" y="52" text-anchor="middle" fill="#ffffff" font-family="Plus Jakarta Sans,sans-serif" font-size="26" font-weight="500" id="sc-num">0</text>
+              <text x="55" y="66" text-anchor="middle" fill="rgba(255,255,255,.62)" font-family="Plus Jakarta Sans,sans-serif" font-size="10" font-weight="500">/100</text>
+            </svg>
+            <div>
+              <div class="score-kicker">Score y benchmark</div>
+              <div class="score-copy" id="r-score-copy"></div>
+            </div>
+          </div>
+          <div class="score-diagnosis">
+            <div class="score-kicker">Qué significa y cómo mejorarlo</div>
+            <h3 id="r-headline"></h3>
+            <p id="r-summary"></p>
+          </div>
+          <div class="report-actions">
+            <button onclick="handlePrimaryCta()" class="btn btn-green" id="r-primary-cta">Reservar reunión</button>
+            <button onclick="handleSecondaryCta()" class="btn btn-outline-g" id="r-secondary-cta">Ver cursos</button>
+          </div>
+          <div class="cta-secondary-note" id="r-cta-note"></div>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="mcard"><div class="mlbl">Horas perdidas / año</div><div class="mval" id="m-hl">—</div><div class="msub">fricción operativa anual estimada</div></div>
+        <div class="mcard"><div class="mlbl">Coste oculto actual</div><div class="mval" id="m-ml">—</div><div class="msub">impacto económico anual estimado</div></div>
+        <div class="mcard accent"><div class="mlbl">Ahorro priorizable</div><div class="mval green" id="m-ms">—</div><div class="msub">si se ejecuta bien el primer frente</div></div>
+        <div class="mcard accent"><div class="mlbl">ROI potencial 12 meses</div><div class="mval green" id="m-roi">—</div><div class="msub">retorno orientativo si el plan escala</div></div>
+      </div>
+      <div class="dashboard-card">
+        <div class="section-head">Top 3 oportunidades priorizadas</div>
+        <div class="prio-grid" id="r-prios"></div>
+      </div>
+      <div class="report-grid">
+        <div class="dashboard-card">
+          <div class="section-head">Plan de acción 30 / 60 / 90 días</div>
+          <div class="roadmap" id="r-roadmap"></div>
+        </div>
+        <div class="dashboard-note">
+          <h3>Formaciones recomendadas</h3>
+          <p id="r-cta-p"></p>
+          <div class="section-head" style="margin-top:22px">Formaciones de Sixminds</div>
+          <div class="courses-grid" id="r-courses"></div>
+          <div class="results-actions">
+            <button onclick="handlePrimaryCta()" class="btn btn-green" id="r-primary-cta-secondary">Reservar reunión</button>
+            <button onclick="handleSecondaryCta()" class="btn btn-outline-g" id="r-secondary-cta-secondary">Ver cursos</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-outline" onclick="reset()" style="width:100%;justify-content:center">Reiniciar diagnóstico</button>
+    </div>
+  `;
+}
+
+function renderResults(data) {
+  ensureResultsShell();
+  const c = getMetricsBundle(data);
+  const company = companyName();
+  const score = data.score || c.score;
+  const courses = normalizeCourses(data);
+  const cta = deriveCta(score);
+  const headline = cleanText(String(data.headline || '').trim() || `Diagnóstico ejecutivo de IA para ${company}`);
+  const summary = cleanText(data.summary || 'Hay margen claro para mejorar foco, eficiencia y adopción con un plan más ejecutivo y accionable.');
+  const bestMove = data.best_first_move || fallback().best_first_move;
+
+  setText('r-company', company);
+  setText('r-headline', headline.length > 96 ? headline.slice(0, 93) + '…' : headline);
+  setText('r-summary', summary);
+  setText('r-score-copy', `Score actual ${score}/100. El gap estimado hasta una madurez sólida es de ${Math.max(0, 100 - score)} puntos.`);
+  setText('r-cta-note', cta.note || '');
+  setText('r-cta-p', `Estas formaciones están seleccionadas para que ${company} pueda activar criterio, adopción y ejecución real sin dispersarse en demasiadas herramientas a la vez.`);
+  setText('r-best-title', bestMove.title || 'Activar un primer caso de uso medible');
+  setText('r-best-copy', `${bestMove.process || 'Proceso prioritario'}: ${bestMove.first_action || bestMove.why || 'definir alcance, owner y métrica de éxito.'} ${bestMove.expected_effect ? `Efecto esperado: ${bestMove.expected_effect}` : ''}`);
+
+  setText('m-hl', c.totalH.toLocaleString('es-ES') + 'h');
+  setText('m-ml', '€' + c.moneyL.toLocaleString('es-ES'));
+  setText('m-ms', '€' + c.mSaved.toLocaleString('es-ES'));
+  setText('m-roi', '€' + c.roi12m.toLocaleString('es-ES'));
+
+  document.getElementById('r-prios').innerHTML = (data.priorities || []).slice(0, 3).map((p, i) => `
+    <div class="prio-card">
+      <div class="prio-top">
+        <div class="prio-index">Oportunidad 0${i + 1}</div>
+        <div class="prio-badges">
+          <span class="ptag ${p.impact === 'Alto' ? 'hi' : ''}">${esc(cleanText(p.impact || 'Impacto'))}</span>
+          ${priorityHorizonLabel(p) ? `<span class="ptag">${esc(priorityHorizonLabel(p))}</span>` : ''}
+        </div>
+      </div>
+      <div class="prio-title">${esc(cleanText(p.title))}</div>
+      <div class="prio-body">${esc(cleanText(p.body))}</div>
+      ${p.why_now ? `<div class="tool-why" style="margin-top:14px"><span class="hl">Por qué ahora:</span> ${esc(cleanText(p.why_now))}</div>` : ''}
+    </div>
+  `).join('');
+
+  document.getElementById('r-roadmap').innerHTML = (data.roadmap || []).slice(0, 3).map(r => `
+    <div class="roadmap-card">
+      <div class="rphase">
+        <div class="rphase-head">
+          <div class="rphase-period">${esc(cleanText(r.phase))}</div>
+          <div class="rphase-title">${esc(cleanText(r.title))}</div>
+        </div>
+        <div class="rphase-items">${(r.actions || []).slice(0, 4).map(a => `<div class="ritem">${esc(cleanText(a))}</div>`).join('')}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('r-courses').innerHTML = courses.map(course => `
+    <div class="course-card">
+      <div class="course-name">${esc(cleanText(course.name))}</div>
+      <div class="course-why">${esc(cleanText(course.reason))}</div>
+      <a class="course-link" href="${esc(course.url)}" target="_blank" rel="noopener noreferrer">Ver curso</a>
+    </div>
+  `).join('');
+
+  updateCtaButtons(cta);
+
+  S.currentCta = cta;
+  go('results');
+
+  setTimeout(() => {
+    const circ = 301.6;
+    document.getElementById('sarc').style.strokeDashoffset = circ - (score / 100) * circ;
+    cnt('sc-num', 0, score, 1200);
+  }, 120);
+
+  sendH();
+}
+
+function handlePrimaryCta() {
+  const type = S.currentCta?.primaryType || 'course';
+  trackEvent('diagnostico_cta_click', { slot: 'primary', type });
+  if (type === 'call') {
+    openCal();
+    return;
+  }
+  openExternal(APP_URLS.courses);
+}
+
+function handleSecondaryCta() {
+  const type = S.currentCta?.secondaryType || 'call';
+  trackEvent('diagnostico_cta_click', { slot: 'secondary', type });
+  if (type === 'call') {
+    openCal();
+    return;
+  }
+  openExternal(APP_URLS.courses);
+}
+
+function cnt(id, from, to, dur) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const t0 = performance.now();
+  function f(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(f);
+  }
+  requestAnimationFrame(f);
+}
+
+function openCal() {
+  if (window.Calendly) {
+    Calendly.initPopupWidget({ url: APP_URLS.calendly });
+    return;
+  }
+  openExternal(APP_URLS.calendly);
+}
+
+function sendH(force = false) {
+  if (window.parent === window) return;
+  const nextHeight = Math.max(
+    document.body ? document.body.scrollHeight : 0,
+    document.documentElement ? document.documentElement.scrollHeight : 0,
+    document.body ? document.body.offsetHeight : 0,
+    document.documentElement ? document.documentElement.offsetHeight : 0,
+    window.innerHeight || 0
+  );
+  const safeHeight = Math.max(560, nextHeight);
+
+  if (!force && safeHeight <= S.lastPostedHeight) return;
+  if (!force && Math.abs(safeHeight - S.lastPostedHeight) < 24) return;
+
+  S.lastPostedHeight = safeHeight;
+  setTimeout(() => {
+    window.parent.postMessage({ type: 'iframeHeight', height: safeHeight }, '*');
+  }, 120);
+}
+
+function reset() {
+  S.a = {};
+  S.chips = {};
+  S.gpt = null;
+  S.followup = [];
+  S.followupAnswers = {};
+  document.querySelectorAll('.opt').forEach(o => o.classList.remove('sel'));
+  document.querySelectorAll('.gcard').forEach(c => c.classList.remove('sel'));
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+  setDisabled(['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10', 'bsubmit', 'b-followup'], true);
+  ['fname', 'fcompany', 'femail', 'fphone', 'frole', 'femployees', 'foutcome'].forEach(id => {
+    const i = document.getElementById(id);
+    if (i) i.value = '';
+  });
+  const followupWrap = document.getElementById('followup-fields');
+  if (followupWrap) followupWrap.innerHTML = '';
+  go(0);
+}
+
+window.addEventListener('load', () => {
+  sendH(true);
+});
+window.addEventListener('resize', () => {
+  if (isFormFieldFocused()) return;
+  sendH(false);
+});
+window.addEventListener('orientationchange', () => {
+  if (isFormFieldFocused()) return;
+  setTimeout(() => sendH(false), 180);
+});
+updateProg();
+</script>
+</body>
+</html>
+
+
+

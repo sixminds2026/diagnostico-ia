@@ -174,7 +174,6 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
 .dashboard-note .cta-btns .btn{flex:1 1 220px;justify-content:center}
 .results-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
 .results-actions .btn{flex:1 1 240px;justify-content:center}
-.cta-secondary-note{font-size:14px;color:var(--w);margin-top:12px}
 .section-head{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.14em;color:var(--w);margin-bottom:24px;display:flex;align-items:center;gap:12px}
 .section-head::after{content:'';flex:1;height:1px;background:rgba(117,251,146,0.32)}
 .roadmap{display:flex;flex-direction:column;gap:16px}
@@ -1312,14 +1311,12 @@ function ensureResultsShell() {
           </div>
           <div class="score-diagnosis">
             <div class="score-kicker">Qué significa y cómo mejorarlo</div>
-            <h3 id="r-headline"></h3>
             <p id="r-summary"></p>
           </div>
           <div class="report-actions">
             <button onclick="handlePrimaryCta()" class="btn btn-green" id="r-primary-cta">Reservar reunión</button>
             <button onclick="handleSecondaryCta()" class="btn btn-outline-g" id="r-secondary-cta">Ver cursos</button>
           </div>
-          <div class="cta-secondary-note" id="r-cta-note"></div>
         </div>
       </div>
       <div class="metrics">
@@ -1337,11 +1334,10 @@ function ensureResultsShell() {
           <div class="section-head">Plan de acción 30 / 60 / 90 días</div>
           <div class="roadmap" id="r-roadmap"></div>
         </div>
-        <div class="dashboard-note">
-          <h3>Formaciones recomendadas</h3>
-          <p id="r-cta-p"></p>
-          <div class="section-head" style="margin-top:22px">Formaciones de Sixminds</div>
-          <div class="courses-grid" id="r-courses"></div>
+      <div class="dashboard-note">
+        <h3>Formaciones recomendadas</h3>
+        <div class="section-head" style="margin-top:22px">Formaciones de Sixminds</div>
+        <div class="courses-grid" id="r-courses"></div>
           <div class="results-actions">
             <button onclick="handlePrimaryCta()" class="btn btn-green" id="r-primary-cta-secondary">Reservar reunión</button>
             <button onclick="handleSecondaryCta()" class="btn btn-outline-g" id="r-secondary-cta-secondary">Ver cursos</button>
@@ -1360,16 +1356,12 @@ function renderResults(data) {
   const score = data.score || c.score;
   const courses = normalizeCourses(data);
   const cta = deriveCta(score);
-  const headline = cleanText(String(data.headline || '').trim() || `Diagnóstico ejecutivo de IA para ${company}`);
   const summary = cleanText(data.summary || 'Hay margen claro para mejorar foco, eficiencia y adopción con un plan más ejecutivo y accionable.');
   const bestMove = data.best_first_move || fallback().best_first_move;
 
   setText('r-company', company);
-  setText('r-headline', headline.length > 96 ? headline.slice(0, 93) + '…' : headline);
   setText('r-summary', summary);
   setText('r-score-copy', `Score actual ${score}/100. El gap estimado hasta una madurez sólida es de ${Math.max(0, 100 - score)} puntos.`);
-  setText('r-cta-note', cta.note || '');
-  setText('r-cta-p', `Estas formaciones están seleccionadas para que ${company} pueda activar criterio, adopción y ejecución real sin dispersarse en demasiadas herramientas a la vez.`);
   setText('r-best-title', bestMove.title || 'Activar un primer caso de uso medible');
   setText('r-best-copy', `${bestMove.process || 'Proceso prioritario'}: ${bestMove.first_action || bestMove.why || 'definir alcance, owner y métrica de éxito.'} ${bestMove.expected_effect ? `Efecto esperado: ${bestMove.expected_effect}` : ''}`);
 

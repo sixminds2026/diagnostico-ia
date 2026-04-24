@@ -553,6 +553,9 @@ Reglas críticas:
 - Cuida ortografía, tildes, puntuación, mayúsculas iniciales y espacios entre frases.
 - No entregues frases telegráficas, textos cortados ni sintaxis descuidada.
 - Cada campo debe poder enseñarse a una empresa tal cual, sin correcciones manuales posteriores.
+- Si una formación de Sixminds es claramente el siguiente paso lógico, puedes mencionarla dentro de priority.first_intervention o en una acción del roadmap.
+- Cuando menciones una formación de Sixminds dentro de prioridades o roadmap, usa el nombre exacto del curso y solo si aporta valor real al caso.
+- No fuerces la mención de formaciones en todas las prioridades; bastan una o dos menciones bien justificadas si encajan.
 
 Lógica de personalización:
 - Si el área incluye marketing: prioriza contenidos, research, campañas, assets, reporting o conversión. Menciona ChatGPT/Claude/Gemini para research y copy, Canva si aparece creatividad, y automatización solo si hay tareas repetitivas claras.

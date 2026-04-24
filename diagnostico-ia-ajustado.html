@@ -1576,7 +1576,6 @@ function ensureResultsShell() {
           </div>
         </div>
       </div>
-      <button class="btn btn-outline" onclick="reset()" style="width:100%;justify-content:center">Reiniciar diagnóstico</button>
     </div>
   `;
 }
@@ -1727,17 +1726,6 @@ function sendH(force = false) {
   setTimeout(() => {
     window.parent.postMessage({ type: 'iframeHeight', height: safeHeight }, '*');
   }, 120);
-}
-
-function reset() {
-  S.lastPostedHeight = 0;
-  if (window.parent !== window) {
-    try {
-      window.parent.postMessage({ type: 'iframeHeight', height: 0 }, '*');
-      window.parent.postMessage({ type: 'iframeScrollTop' }, '*');
-    } catch (error) {}
-  }
-  window.location.replace(window.location.pathname + window.location.search + window.location.hash);
 }
 
 window.addEventListener('load', () => {

@@ -41,10 +41,10 @@ body{font-family:var(--f);background:radial-gradient(circle at top,rgba(117,251,
 .prog-label{position:fixed;top:94px;right:24px;font-size:13px;font-weight:500;color:var(--w3);z-index:300;letter-spacing:.06em;display:none}
 
 /* Steps */
-.step{display:none;min-height:100vh;padding:128px 40px 44px;max-width:1080px;margin:0 auto;width:100%;flex-direction:column;justify-content:flex-start}
+.step{display:none;min-height:100vh;padding:148px 40px 44px;max-width:1080px;margin:0 auto;width:100%;flex-direction:column;justify-content:flex-start}
 .step#s0,.step#s-loading{justify-content:center}
-.step#s-results{max-width:1380px;padding-top:128px;padding-left:48px;padding-right:48px}
-.step#s-followup{max-width:1160px;padding-top:128px}
+.step#s-results{max-width:1380px;padding-top:148px;padding-left:48px;padding-right:48px}
+.step#s-followup{max-width:1160px;padding-top:148px}
 .step.on{display:flex;animation:up .38s cubic-bezier(.4,0,.2,1) both}
 @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
@@ -237,7 +237,7 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
   .topbar-logo{height:28px}
   .prog-wrap{top:68px}
   .prog-label{top:82px;right:18px}
-  .step,.step#s-results,.step#s-followup{padding:110px 18px 32px}
+  .step,.step#s-results,.step#s-followup{padding:122px 18px 32px}
   .cta-btns{flex-direction:column}
   .cta-btns .btn{width:100%}
   .rphase-items{padding-left:0;margin-top:8px}
@@ -794,8 +794,9 @@ function go(n) {
   S.cur = typeof n === 'number' ? n : n;
   updateProg();
   trackEvent('diagnostico_step_view', { step: S.cur });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  sendH();
+  scrollStepTop();
+  sendH(true);
+  setTimeout(() => sendH(true), 140);
 }
 
 function updateProg() {
@@ -1696,6 +1697,18 @@ function openCal() {
   openExternal(APP_URLS.calendly);
 }
 
+function scrollStepTop() {
+  window.scrollTo({ top: 0, behavior: 'auto' });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+
+  if (window.parent !== window) {
+    try {
+      window.parent.postMessage({ type: 'iframeScrollTop' }, '*');
+    } catch (error) {}
+  }
+}
+
 function sendH(force = false) {
   if (window.parent === window) return;
   const nextHeight = Math.max(
@@ -1717,25 +1730,11 @@ function sendH(force = false) {
 }
 
 function reset() {
-  S.a = {};
-  S.chips = {};
-  S.gpt = null;
-  S.followup = [];
-  S.followupAnswers = {};
-  document.querySelectorAll('.opt').forEach(o => o.classList.remove('sel'));
-  document.querySelectorAll('.gcard').forEach(c => c.classList.remove('sel'));
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
-  setDisabled(['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9', 'b10', 'bsubmit', 'b-followup'], true);
-  ['fname', 'fcompany', 'femail', 'fphone', 'frole', 'femployees', 'foutcome'].forEach(id => {
-    const i = document.getElementById(id);
-    if (i) i.value = '';
-  });
-  const followupWrap = document.getElementById('followup-fields');
-  if (followupWrap) followupWrap.innerHTML = '';
-  go(0);
+  window.location.reload();
 }
 
 window.addEventListener('load', () => {
+  scrollStepTop();
   sendH(true);
 });
 window.addEventListener('resize', () => {

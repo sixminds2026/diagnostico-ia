@@ -519,6 +519,10 @@ Reglas críticas:
 - Si el usuario marca "No lo tenemos claro", el diagnóstico debe priorizar discovery, casos de uso y criterio antes de automatizaciones complejas.
 - Si los bloqueadores incluyen privacidad/seguridad, incluye un paso concreto de criterios de uso, datos y gobernanza ligera.
 - Follow-up solo si falta una información imprescindible; no lo uses por defecto.
+- El lenguaje debe ser profesional, claro y ejecutivo.
+- Cuida ortografía, tildes, puntuación, mayúsculas iniciales y espacios entre frases.
+- No entregues frases telegráficas, textos cortados ni sintaxis descuidada.
+- Cada campo debe poder enseñarse a una empresa tal cual, sin correcciones manuales posteriores.
 
 Lógica de personalización:
 - Si el área incluye marketing: prioriza contenidos, research, campañas, assets, reporting o conversión. Menciona ChatGPT/Claude/Gemini para research y copy, Canva si aparece creatividad, y automatización solo si hay tareas repetitivas claras.

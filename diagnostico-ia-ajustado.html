@@ -1017,7 +1017,11 @@ function esc(value) {
 }
 
 function cleanText(value) {
-  return String(value ?? '');
+  return String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .replace(/([.?!])([A-Za-zÁÉÍÓÚÑáéíóúñ])/g, '$1 $2')
+    .trim();
 }
 
 function conciseText(value, max = 60) {
@@ -1397,7 +1401,7 @@ function renderResults(data) {
   const score = data.score || c.score;
   const courses = normalizeCourses(data);
   const cta = deriveCta(score);
-  const summary = 'Score y roadmap de mejora.';
+  const summary = 'Tu score muestra vuestro nivel actual de madurez en IA. A continuación, te proponemos mejoras concretas y próximos pasos para cerrar el gap y avanzar con más claridad.';
   const bestMove = data.best_first_move || fallback().best_first_move;
 
   setText('r-company', company);

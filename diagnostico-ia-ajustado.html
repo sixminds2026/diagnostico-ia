@@ -1712,11 +1712,47 @@ function cnt(id, from, to, dur) {
 }
 
 function openCal() {
-  if (window.Calendly) {
-    Calendly.initPopupWidget({ url: APP_URLS.calendly });
-    return;
-  }
-  openExternal(APP_URLS.calendly);
+  const url = APP_URLS.calendly;
+  const openFallback = () => {
+    try {
+      const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+      if (newWindow) return;
+    } catch (error) {}
+
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = url;
+        return;
+      }
+    } catch (error) {}
+
+    window.location.href = url;
+  };
+
+  const openPopup = () => {
+    if (!window.Calendly || typeof window.Calendly.initPopupWidget !== 'function') return false;
+    try {
+      window.Calendly.initPopupWidget({ url });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  if (openPopup()) return;
+
+  let attempts = 0;
+  const timer = setInterval(() => {
+    attempts += 1;
+    if (openPopup()) {
+      clearInterval(timer);
+      return;
+    }
+    if (attempts >= 8) {
+      clearInterval(timer);
+      openFallback();
+    }
+  }, 180);
 }
 
 function scrollStepTop() {

@@ -42,7 +42,8 @@ body{font-family:var(--f);background:radial-gradient(circle at top,rgba(117,251,
 
 /* Steps */
 .step{display:none;min-height:100vh;padding:148px 40px 44px;max-width:1080px;margin:0 auto;width:100%;flex-direction:column;justify-content:flex-start}
-.step#s0,.step#s-loading{justify-content:center}
+.step#s0{justify-content:center}
+.step#s-loading{justify-content:flex-start;align-items:center}
 .step#s-results{max-width:1380px;padding-top:148px;padding-left:48px;padding-right:48px}
 .step#s-followup{max-width:1160px;padding-top:148px}
 .step.on{display:flex;animation:up .38s cubic-bezier(.4,0,.2,1) both}
@@ -138,6 +139,7 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
 
 /* Loading */
 #step-loading{text-align:center;padding:80px 28px}
+.load-panel{width:100%;max-width:720px;text-align:center;padding-top:24px}
 .load-num{font-size:78px;font-weight:500;color:var(--g);letter-spacing:-.05em;line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums}
 .load-sub{font-size:15px;color:var(--w3);letter-spacing:.1em;text-transform:uppercase;font-weight:500}
 .load-bar{width:200px;height:1px;background:var(--ln);margin:32px auto;position:relative;overflow:hidden}
@@ -237,13 +239,33 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
   .topbar-logo{height:28px}
   .prog-wrap{top:68px}
   .prog-label{top:82px;right:18px}
-  .step,.step#s-results,.step#s-followup{padding:122px 18px 32px}
+  .step,.step#s-results,.step#s-followup{padding:122px 14px 24px}
+  .report-shell{gap:16px}
+  .report-top,.report-grid,.prio-grid{grid-template-columns:1fr;gap:16px}
+  .dashboard-card,.followup-card,.mcard,.tool,.prio-card,.roadmap-card,.dashboard-note,.course-card{padding:20px}
+  .mcard{padding:20px}
+  .prio-card{padding:20px}
+  .roadmap-card{padding:20px}
+  .course-card{padding:20px;min-height:auto}
+  .tool{padding:20px;min-height:auto}
+  .report-headline{font-size:32px;max-width:none}
+  .report-summary,.best-move-line{font-size:17px;line-height:1.68}
+  .score-copy{font-size:16px;line-height:1.65;max-width:none}
+  .score-diagnosis{padding-top:18px}
+  .score-diagnosis p{font-size:15px;line-height:1.62}
+  .prio-title{font-size:22px}
+  .prio-body,.tool-why,.course-why,.ritem{font-size:16px;line-height:1.62}
+  .rphase-title{font-size:20px}
+  .results-actions,.report-actions{gap:10px}
   .cta-btns{flex-direction:column}
   .cta-btns .btn{width:100%}
   .rphase-items{padding-left:0;margin-top:8px}
-  .report-top,.report-grid,.prio-grid{grid-template-columns:1fr}
   .score-card-top{flex-direction:column;align-items:flex-start}
   .followup-actions{flex-direction:column}
+  .load-panel{padding-top:8px}
+  .load-num{font-size:62px}
+  .load-bar{margin:24px auto}
+  .load-msg{font-size:16px}
 }
 </style>
 </head>
@@ -601,8 +623,8 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
 </div>
 
 <!-- LOADING -->
-<div class="step" id="s-loading" style="min-height:100vh;align-items:center;justify-content:center;text-align:center">
-  <div>
+<div class="step" id="s-loading" style="min-height:100vh;text-align:center">
+  <div class="load-panel">
     <div class="load-num" id="load-pct">0%</div>
     <div class="load-sub">Analizando tu empresa</div>
     <div class="load-bar"></div>

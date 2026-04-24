@@ -974,9 +974,9 @@ async function askOpenAI(payload) {
 function calcMetrics() {
   const situationScoreMap = { none: 14, individual: 28, pilots: 44, regular: 62, embedded: 76 };
   const lostHoursScoreMap = { '0_5': 2, '5_10': 5, '10_15': 8, '15_25': 11, '20_30': 14, '30_plus': 16 };
-  const lostHoursMidMap = { '0_5': 2.5, '5_10': 7.5, '10_15': 12.5, '15_25': 17.5, '20_30': 25, '30_plus': 32 };
+  const lostHoursConservativeMap = { '0_5': 2, '5_10': 6, '10_15': 9, '15_25': 13, '20_30': 18, '30_plus': 22 };
   const userScoreMap = { nobody: 0, management: 4, few_people: 8, one_department: 12, several_departments: 18, company_wide: 24 };
-  const situationHoursMap = { none: 4.2, individual: 3.4, pilots: 2.7, regular: 1.9, embedded: 1.25 };
+  const situationHoursMap = { none: 3.8, individual: 3.1, pilots: 2.5, regular: 1.8, embedded: 1.2 };
   const savingsMap = { none: 0.26, individual: 0.24, pilots: 0.21, regular: 0.17, embedded: 0.13 };
   const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, finance: 0.22, it_data: 0.2, procurement: 0.26, legal: 0.18, unclear: 0.26 };
 
@@ -994,10 +994,14 @@ function calcMetrics() {
   const hourlyCost = team <= 10 ? 24 : team <= 50 ? 31 : 38;
   const impactedShare = areaCoverage[mainArea] || 0.3;
   const impactedTeam = Math.max(2, Math.min(team, Math.round(team * impactedShare)));
-  const blockerFactor = 1 + Math.min(0.24, (blockerCount - 1) * 0.06);
-  const declaredWeeklyHoursPerEmployee = lostHoursMidMap[S.a.usage?.val];
-  const modeledWeeklyHoursPerEmployee = (situationHoursMap[S.a.ai_situation?.val] || 3.4) * blockerFactor * (1 + (taskCount - 1) * 0.07);
-  const weeklyHoursPerEmployee = Math.min(40, declaredWeeklyHoursPerEmployee || modeledWeeklyHoursPerEmployee);
+  const blockerFactor = 1 + Math.min(0.18, (blockerCount - 1) * 0.04);
+  const taskFactor = 1 + Math.min(0.12, (taskCount - 1) * 0.04);
+  const declaredWeeklyHoursPerEmployee = lostHoursConservativeMap[S.a.usage?.val];
+  const modeledWeeklyHoursPerEmployee = (situationHoursMap[S.a.ai_situation?.val] || 3.1) * blockerFactor * taskFactor;
+  const blendedWeeklyHoursPerEmployee = declaredWeeklyHoursPerEmployee
+    ? (declaredWeeklyHoursPerEmployee * 0.72) + (modeledWeeklyHoursPerEmployee * 0.28)
+    : modeledWeeklyHoursPerEmployee;
+  const weeklyHoursPerEmployee = Math.min(24, Math.max(1.5, blendedWeeklyHoursPerEmployee));
   const weeklyHoursTeam = weeklyHoursPerEmployee * impactedTeam;
   const hrs = weeklyHoursPerEmployee;
   const scoreRaw =
@@ -1009,9 +1013,9 @@ function calcMetrics() {
     (team > 40 ? 3 : 0) -
     (S.a.objective?.val === 'explore' ? 4 : 0);
   const score = Math.max(8, Math.min(92, Math.round(scoreRaw)));
-  const totalH = Math.round(weeklyHoursPerEmployee * 48);
+  const totalH = Math.round(weeklyHoursPerEmployee * 44);
   const moneyL = Math.round(totalH * hourlyCost);
-  const totalHTeam = Math.round(weeklyHoursTeam * 48);
+  const totalHTeam = Math.round(weeklyHoursTeam * 44);
   const moneyLTeam = Math.round(totalHTeam * hourlyCost);
   const saveRate = savingsMap[S.a.ai_situation?.val] || 0.24;
   const hSaved = Math.round(totalH * saveRate);

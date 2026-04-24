@@ -267,9 +267,9 @@ function calcMetrics(payload) {
   const contact = payload.contact || {};
   const situationScoreMap = { none: 14, individual: 28, pilots: 44, regular: 62, embedded: 76 };
   const lostHoursScoreMap = { "0_5": 2, "5_10": 5, "10_15": 8, "15_25": 11, "20_30": 14, "30_plus": 16 };
-  const lostHoursMidMap = { "0_5": 2.5, "5_10": 7.5, "10_15": 12.5, "15_25": 17.5, "20_30": 25, "30_plus": 32 };
+  const lostHoursConservativeMap = { "0_5": 2, "5_10": 6, "10_15": 9, "15_25": 13, "20_30": 18, "30_plus": 22 };
   const userScoreMap = { nobody: 0, management: 4, few_people: 8, one_department: 12, several_departments: 18, company_wide: 24 };
-  const situationHoursMap = { none: 4.2, individual: 3.4, pilots: 2.7, regular: 1.9, embedded: 1.25 };
+  const situationHoursMap = { none: 3.8, individual: 3.1, pilots: 2.5, regular: 1.8, embedded: 1.2 };
   const aiSavingsMap = { none: 0.26, individual: 0.24, pilots: 0.21, regular: 0.17, embedded: 0.13 };
   const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, finance: 0.22, it_data: 0.2, procurement: 0.26, legal: 0.18, unclear: 0.26 };
 
@@ -287,10 +287,14 @@ function calcMetrics(payload) {
   const hourlyCost = team <= 10 ? 24 : team <= 50 ? 31 : 38;
   const impactedShare = areaCoverage[mainArea] || 0.3;
   const impactedTeam = Math.max(2, Math.min(team, Math.round(team * impactedShare)));
-  const blockerFactor = 1 + Math.min(0.24, (blockerCount - 1) * 0.06);
-  const declaredWeeklyHoursPerEmployee = lostHoursMidMap[a.usage];
-  const modeledWeeklyHoursPerEmployee = (situationHoursMap[a.ai_situation] || 3.4) * blockerFactor * (1 + (taskCount - 1) * 0.07);
-  const weeklyHoursPerEmployee = Math.min(40, declaredWeeklyHoursPerEmployee || modeledWeeklyHoursPerEmployee);
+  const blockerFactor = 1 + Math.min(0.18, (blockerCount - 1) * 0.04);
+  const taskFactor = 1 + Math.min(0.12, (taskCount - 1) * 0.04);
+  const declaredWeeklyHoursPerEmployee = lostHoursConservativeMap[a.usage];
+  const modeledWeeklyHoursPerEmployee = (situationHoursMap[a.ai_situation] || 3.1) * blockerFactor * taskFactor;
+  const blendedWeeklyHoursPerEmployee = declaredWeeklyHoursPerEmployee
+    ? (declaredWeeklyHoursPerEmployee * 0.72) + (modeledWeeklyHoursPerEmployee * 0.28)
+    : modeledWeeklyHoursPerEmployee;
+  const weeklyHoursPerEmployee = Math.min(24, Math.max(1.5, blendedWeeklyHoursPerEmployee));
   const weeklyHoursTeam = weeklyHoursPerEmployee * impactedTeam;
   const hrs = weeklyHoursPerEmployee;
   const scoreRaw =
@@ -302,9 +306,9 @@ function calcMetrics(payload) {
     (team > 40 ? 3 : 0) -
     (a.objective === "explore" ? 4 : 0);
   const score = Math.max(8, Math.min(92, Math.round(scoreRaw)));
-  const totalH = Math.round(weeklyHoursPerEmployee * 48);
+  const totalH = Math.round(weeklyHoursPerEmployee * 44);
   const moneyL = Math.round(totalH * hourlyCost);
-  const totalHTeam = Math.round(weeklyHoursTeam * 48);
+  const totalHTeam = Math.round(weeklyHoursTeam * 44);
   const moneyLTeam = Math.round(totalHTeam * hourlyCost);
   const saveRate = aiSavingsMap[a.ai_situation] || 0.24;
   const hSaved = Math.round(totalH * saveRate);
@@ -586,17 +590,21 @@ Inputs disponibles: objetivo 6-12 meses, áreas de empresa donde la IA podría i
 
 Reglas críticas:
 - El summary debe tener máximo 60 caracteres. Debe ser una frase corta que explique cómo mejorar el score.
+- Debes usar toda la información disponible para personalizar la respuesta: objetivo, áreas seleccionadas, tareas, herramientas actuales, nivel de adopción, quién usa IA, bloqueadores, prioridad, horas perdidas, rol, tamaño de empresa y resultado deseado.
+- Si el usuario marca varias áreas, tareas o bloqueadores, prioriza las 2-3 señales más relevantes y haz explícita esa combinación en el diagnóstico. No ignores esas selecciones ni conviertas todo en texto genérico.
 - Nombra un best_first_move claro y muy concreto: el primer caso de uso que debería activar la empresa según área, tarea, herramientas actuales y horas perdidas.
 - En best_first_move.first_action incluye una acción concreta y una herramienta posible si encaja.
 - No te limites a repetir la herramienta que el usuario ya usa. Si el caso lo justifica, puedes proponer herramientas complementarias y realistas para ese proceso concreto.
 - Ejemplos válidos según el caso: ChatGPT, Copilot, Gemini, Claude, Make, Zapier, n8n, Google Sheets, Google Drive, Canva, Freepik, Figma, Webflow, HubSpot, Airtable, Notion, Slack, Teams, Fireflies, Loom, Runway, OpenAI API.
 - Cada priority debe incluir proceso concreto, síntoma actual, primera intervención realista y efecto de negocio.
 - Cada priority.body debe sentirse adaptado al caso: usa al menos dos señales del input, por ejemplo área + tarea, bloqueador + prioridad, herramienta actual + objetivo, horas perdidas + resultado deseado.
+- Intenta que entre best_first_move, priorities y roadmap aparezcan varias señales concretas del formulario, no siempre las mismas. Si hay contexto suficiente, combina 3 señales cuando aporte claridad.
 - Cada priority.first_intervention debe nombrar una acción implementable en 1-2 semanas y, si procede, una herramienta concreta.
 - Cada priority.concrete_process no puede ser genérico. Debe nombrar el proceso real: reporting semanal, cualificación comercial, respuestas repetitivas a clientes, documentación interna, generación de contenidos, análisis de datos, onboarding, etc.
 - Cada priority.business_effect debe explicar un efecto verificable: menos horas manuales, menor tiempo de respuesta, mejor calidad del entregable, más velocidad comercial, menos dependencia de una persona, mejor visibilidad directiva.
 - El roadmap 30/60/90 debe tener acciones tangibles conectadas con el resultado deseado, no frases abstractas.
 - No inventes sector, facturación, herramientas o datos no presentes.
+- Si recomiendas una herramienta que el usuario no ha marcado, debe ser porque encaja claramente como complemento natural del proceso descrito. Explica para qué se usaría.
 - Si el usuario marca "No lo tenemos claro", el diagnóstico debe priorizar discovery, casos de uso y criterio antes de automatizaciones complejas.
 - Si los bloqueadores incluyen privacidad/seguridad, incluye un paso concreto de criterios de uso, datos y gobernanza ligera.
 - Follow-up solo si falta una información imprescindible; no lo uses por defecto.
@@ -627,6 +635,7 @@ Evita:
 - Frases como "la IA puede transformar", "oportunidad clara", "optimizar procesos" sin nombrar proceso.
 - Listas de herramientas sin explicar para qué se usarían o por qué encajan con ese proceso.
 - Repetir la misma idea en best_first_move, priorities y roadmap.
+- Ignorar respuestas abiertas del usuario o dejar fuera el objetivo deseado cuando aporta contexto útil.
 
 Cursos Sixminds:
 - Recomienda exactamente 2 cursos reales de esta whitelist: ${COURSE_NAMES.map(name => `"${name}"`).join(", ")}.

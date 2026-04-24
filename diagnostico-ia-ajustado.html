@@ -250,7 +250,7 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
     <div class="intro-copy">
       <div class="pill"><div class="dot"></div>Diagnóstico gratuito · 4 minutos</div>
       <h1 style="font-size:clamp(36px,4.8vw,56px)">¿Cuánto está costando la falta de IA a tu empresa?</h1>
-      <p class="sub">Responde 10 preguntas estratégicas y obtén una lectura ejecutiva de madurez IA. Con este diagnóstico verás el siguiente paso más lógico, las prioridades reales y un roadmap 30 / 60 / 90 para avanzar con más criterio.</p>
+      <p class="sub">Responde 10 preguntas estratégicas y obtén una lectura ejecutiva de madurez IA. Con este diagnóstico obtendrás la siguiente información de forma gratuita:</p>
       <ul class="intro-points">
         <li>Siguiente paso más lógico</li>
         <li>Prioridades reales</li>
@@ -327,6 +327,8 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
     <div class="chip" onclick="tog(this,'areas','product')">Producto / innovación</div>
     <div class="chip" onclick="tog(this,'areas','finance')">Finanzas / control de gestión</div>
     <div class="chip" onclick="tog(this,'areas','it_data')">IT / datos</div>
+    <div class="chip" onclick="tog(this,'areas','procurement')">Compras / logística</div>
+    <div class="chip" onclick="tog(this,'areas','legal')">Legal / compliance</div>
     <div class="chip" onclick="tog(this,'areas','unclear')">No lo tenemos claro aún</div>
   </div>
   <div class="row">
@@ -419,6 +421,10 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
     <div class="chip" onclick="tog(this,'ai_tools','automations')">Automatizaciones con IA</div>
     <div class="chip" onclick="tog(this,'ai_tools','notion')">Notion AI / asistentes internos</div>
     <div class="chip" onclick="tog(this,'ai_tools','crm_ai')">CRM o herramientas comerciales con IA</div>
+    <div class="chip" onclick="tog(this,'ai_tools','perplexity')">Perplexity / research con IA</div>
+    <div class="chip" onclick="tog(this,'ai_tools','meeting_ai')">Asistentes de reuniones / transcripción</div>
+    <div class="chip" onclick="tog(this,'ai_tools','bi_ai')">BI o analítica con IA</div>
+    <div class="chip" onclick="tog(this,'ai_tools','internal_agents')">Agentes o bots internos</div>
     <div class="chip" onclick="tog(this,'ai_tools','specific')">Otras herramientas específicas</div>
     <div class="chip" onclick="tog(this,'ai_tools','none')">No usamos ninguna</div>
   </div>
@@ -440,9 +446,14 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
     <div class="chip" onclick="tog(this,'tasks','customer_replies')">Atención a clientes / respuestas repetitivas</div>
     <div class="chip" onclick="tog(this,'tasks','admin')">Tareas administrativas</div>
     <div class="chip" onclick="tog(this,'tasks','sales_prospecting')">Prospección comercial / ventas</div>
+    <div class="chip" onclick="tog(this,'tasks','proposals')">Ofertas, propuestas o presupuestos</div>
+    <div class="chip" onclick="tog(this,'tasks','crm_erp')">Actualización de CRM / ERP</div>
     <div class="chip" onclick="tog(this,'tasks','coordination')">Organización y coordinación interna</div>
     <div class="chip" onclick="tog(this,'tasks','training_docs')">Formación / documentación interna</div>
     <div class="chip" onclick="tog(this,'tasks','email_meetings')">Emails, reuniones y seguimiento</div>
+    <div class="chip" onclick="tog(this,'tasks','knowledge_search')">Búsqueda de información en documentos</div>
+    <div class="chip" onclick="tog(this,'tasks','data_entry')">Clasificación o entrada manual de datos</div>
+    <div class="chip" onclick="tog(this,'tasks','planning')">Planificación de proyectos o tareas</div>
     <div class="chip" onclick="tog(this,'tasks','quality_review')">Revisión de calidad / control de errores</div>
     <div class="chip" onclick="tog(this,'tasks','unclear')">No lo tenemos claro todavía</div>
   </div>
@@ -503,8 +514,12 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
     <div class="chip" onclick="tog(this,'blockers','privacy')">Dudas sobre privacidad / seguridad</div>
     <div class="chip" onclick="tog(this,'blockers','use_cases')">No vemos aún casos de uso claros</div>
     <div class="chip" onclick="tog(this,'blockers','data_quality')">Datos desordenados o poco accesibles</div>
+    <div class="chip" onclick="tog(this,'blockers','system_silos')">Sistemas desconectados / silos</div>
     <div class="chip" onclick="tog(this,'blockers','process_clarity')">Procesos poco definidos</div>
     <div class="chip" onclick="tog(this,'blockers','leadership')">Falta de apoyo interno / liderazgo</div>
+    <div class="chip" onclick="tog(this,'blockers','ownership')">No hay owner claro</div>
+    <div class="chip" onclick="tog(this,'blockers','measurement')">No sabemos medir impacto / ROI</div>
+    <div class="chip" onclick="tog(this,'blockers','change_management')">Resistencia al cambio del equipo</div>
     <div class="chip" onclick="tog(this,'blockers','budget')">Presupuesto limitado</div>
   </div>
   <div class="row">
@@ -638,6 +653,8 @@ const AREA_MAP = {
   product: 'Producto / innovación',
   finance: 'Finanzas / control de gestión',
   it_data: 'IT / datos',
+  procurement: 'Compras / logística',
+  legal: 'Legal / compliance',
   unclear: 'No lo tenemos claro aún'
 };
 
@@ -667,6 +684,10 @@ const AI_TOOL_MAP = {
   automations: 'Automatizaciones con IA',
   notion: 'Notion AI / asistentes internos',
   crm_ai: 'CRM o herramientas comerciales con IA',
+  perplexity: 'Perplexity / research con IA',
+  meeting_ai: 'Asistentes de reuniones / transcripción',
+  bi_ai: 'BI o analítica con IA',
+  internal_agents: 'Agentes o bots internos',
   specific: 'Otras herramientas específicas',
   none: 'No usamos ninguna'
 };
@@ -678,9 +699,14 @@ const TASK_MAP = {
   customer_replies: 'Atención a clientes / respuestas repetitivas',
   admin: 'Tareas administrativas',
   sales_prospecting: 'Prospección comercial / ventas',
+  proposals: 'Ofertas, propuestas o presupuestos',
+  crm_erp: 'Actualización de CRM / ERP',
   coordination: 'Organización y coordinación interna',
   training_docs: 'Formación / documentación interna',
   email_meetings: 'Emails, reuniones y seguimiento',
+  knowledge_search: 'Búsqueda de información en documentos',
+  data_entry: 'Clasificación o entrada manual de datos',
+  planning: 'Planificación de proyectos o tareas',
   quality_review: 'Revisión de calidad / control de errores',
   unclear: 'No lo tenemos claro todavía'
 };
@@ -703,8 +729,12 @@ const BLOCKER_MAP = {
   privacy: 'Dudas sobre privacidad / seguridad',
   use_cases: 'No vemos aún casos de uso claros',
   data_quality: 'Datos desordenados o poco accesibles',
+  system_silos: 'Sistemas desconectados / silos',
   process_clarity: 'Procesos poco definidos',
   leadership: 'Falta de apoyo interno / liderazgo',
+  ownership: 'No hay owner claro',
+  measurement: 'No sabemos medir impacto / ROI',
+  change_management: 'Resistencia al cambio del equipo',
   budget: 'Presupuesto limitado'
 };
 
@@ -946,7 +976,7 @@ function calcMetrics() {
   const userScoreMap = { nobody: 0, management: 4, few_people: 8, one_department: 12, several_departments: 18, company_wide: 24 };
   const situationHoursMap = { none: 4.2, individual: 3.4, pilots: 2.7, regular: 1.9, embedded: 1.25 };
   const savingsMap = { none: 0.26, individual: 0.24, pilots: 0.21, regular: 0.17, embedded: 0.13 };
-  const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, finance: 0.22, it_data: 0.2, unclear: 0.26 };
+  const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, finance: 0.22, it_data: 0.2, procurement: 0.26, legal: 0.18, unclear: 0.26 };
 
   const rawEmployees = Number(fieldValue('femployees').replace(/[^\d]/g, ''));
   const team = Math.max(1, Math.min(500, rawEmployees || 12));
@@ -1306,6 +1336,14 @@ function rankCourses() {
     add('IA para crear Aplicaciones Web', 6, 'hace falta estructurar mejor herramientas internas y procesos');
     add('Automatizaciones con IA', 3, 'también hay margen para conectar tareas repetitivas');
   }
+  if (hasArea('procurement')) {
+    add('Automatizaciones con IA', 5, 'compras o logística pueden ganar velocidad con flujos y control operativo');
+    add('IA para crear Aplicaciones Web', 3, 'puede ayudar a ordenar datos, estados y herramientas internas');
+  }
+  if (hasArea('legal')) {
+    add('IA para crear Aplicaciones Web', 4, 'legal o compliance suele necesitar más orden documental y trazabilidad');
+    add('Automatizaciones con IA', 2, 'también hay margen en revisión y circuitos internos');
+  }
   if (hasArea('ops') || hasArea('admin') || hasArea('support')) {
     add('Automatizaciones con IA', 6, 'la mayor oportunidad está en procesos repetitivos y operativa interna');
   }
@@ -1322,6 +1360,14 @@ function rankCourses() {
     add('IA para Marketing', 4, 'hay fricción en prospección y mensajes comerciales');
     add('Automatizaciones con IA', 3, 'conviene convertir seguimiento y rutinas en flujos más ágiles');
   }
+  if (hasTask('proposals')) {
+    add('IA para Marketing', 3, 'hay margen para acelerar propuestas y argumentarios comerciales');
+    add('Automatizaciones con IA', 3, 'conviene estructurar mejor la generación y envío de ofertas');
+  }
+  if (hasTask('crm_erp') || hasTask('data_entry')) {
+    add('Automatizaciones con IA', 5, 'hay demasiada actualización manual en sistemas internos');
+    add('IA para crear Aplicaciones Web', 2, 'puede ayudar a ordenar entradas, validaciones y vistas internas');
+  }
   if (hasTask('customer_replies') || hasTask('coordination') || hasTask('admin') || hasTask('email_meetings')) {
     add('Automatizaciones con IA', 5, 'hay demasiado trabajo manual en coordinación o respuesta repetitiva');
   }
@@ -1329,6 +1375,14 @@ function rankCourses() {
   if (hasTask('analysis') || hasTask('reports')) {
     add('IA para crear Aplicaciones Web', 4, 'hay oportunidad para estructurar reporting y herramientas internas');
     add('Automatizaciones con IA', 2, 'también puede reducirse trabajo manual en reporting');
+  }
+  if (hasTask('knowledge_search')) {
+    add('IA para crear Aplicaciones Web', 4, 'hay fricción para localizar y reutilizar conocimiento interno');
+    add('Productividad con IA para RRHH', 2, 'también mejora la adopción si el equipo encuentra mejor la información');
+  }
+  if (hasTask('planning')) {
+    add('Automatizaciones con IA', 3, 'hay margen para ordenar seguimiento, coordinación y ejecución');
+    add('IA para crear Aplicaciones Web', 2, 'puede ayudar a estructurar mejor flujos internos y vistas operativas');
   }
   if (hasTask('quality_review')) {
     add('IA Generativa para Imagen y Video', 3, 'hay una necesidad clara de elevar calidad de entregables');
@@ -1352,14 +1406,19 @@ function rankCourses() {
   }
 
   if (hasBlocker('training')) add('Productividad con IA para RRHH', 3, 'el bloqueo principal es la capacitación del equipo');
-  if (hasBlocker('tools') || hasBlocker('data_quality') || hasBlocker('process_clarity')) add('IA para crear Aplicaciones Web', 3, 'hay que ordenar herramientas, datos o procesos');
+  if (hasBlocker('tools') || hasBlocker('data_quality') || hasBlocker('process_clarity') || hasBlocker('system_silos')) add('IA para crear Aplicaciones Web', 3, 'hay que ordenar herramientas, datos o procesos');
   if (hasBlocker('time') || hasBlocker('use_cases')) add('Automatizaciones con IA', 3, 'conviene empezar por quick wins muy prácticos');
   if (hasBlocker('budget')) add('Automatizaciones con IA', 2, 'permite demostrar retorno sin un rediseño grande');
+  if (hasBlocker('ownership') || hasBlocker('measurement')) add('IA para crear Aplicaciones Web', 2, 'hace falta más orden para gobernar iniciativas y medir impacto');
+  if (hasBlocker('change_management')) add('Productividad con IA para RRHH', 3, 'la adopción del equipo es un bloqueo real que hay que trabajar');
 
   if (hasTool('canva')) add('IA Generativa para Imagen y Video', 4, 'ya existe una base creativa sobre la que escalar');
   if (hasTool('crm_ai')) add('IA para Marketing', 3, 'ya usan herramientas comerciales con IA');
   if (hasTool('automations')) add('Automatizaciones con IA', 2, 'ya hay una base para profundizar en automatización');
   if (hasTool('notion')) add('Productividad con IA para RRHH', 2, 'ya usan asistentes internos que pueden ordenarse mejor');
+  if (hasTool('meeting_ai') || hasTool('internal_agents')) add('Automatizaciones con IA', 2, 'ya existe base para escalar flujos internos asistidos');
+  if (hasTool('perplexity')) add('IA para Marketing', 2, 'ya hay hábito de research asistido que puede convertirse en proceso');
+  if (hasTool('bi_ai')) add('IA para crear Aplicaciones Web', 3, 'ya hay señales de interés en reporting o analítica asistida');
 
   return [...ranking.entries()]
     .map(([name, value]) => ({

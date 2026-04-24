@@ -40,6 +40,8 @@ const IMPACT_AREA_MAP = {
   product: "Producto / innovación",
   finance: "Finanzas / control de gestión",
   it_data: "IT / datos",
+  procurement: "Compras / logística",
+  legal: "Legal / compliance",
   unclear: "No lo tenemos claro aún",
 };
 
@@ -69,6 +71,10 @@ const AI_TOOL_MAP = {
   automations: "Automatizaciones con IA",
   notion: "Notion AI / asistentes internos",
   crm_ai: "CRM o herramientas comerciales con IA",
+  perplexity: "Perplexity / research con IA",
+  meeting_ai: "Asistentes de reuniones / transcripción",
+  bi_ai: "BI o analítica con IA",
+  internal_agents: "Agentes o bots internos",
   specific: "Otras herramientas específicas",
   none: "No usamos ninguna",
 };
@@ -80,9 +86,14 @@ const TASK_MAP = {
   customer_replies: "Atención a clientes / respuestas repetitivas",
   admin: "Tareas administrativas",
   sales_prospecting: "Prospección comercial / ventas",
+  proposals: "Ofertas, propuestas o presupuestos",
+  crm_erp: "Actualización de CRM / ERP",
   coordination: "Organización y coordinación interna",
   training_docs: "Formación / documentación interna",
   email_meetings: "Emails, reuniones y seguimiento",
+  knowledge_search: "Búsqueda de información en documentos",
+  data_entry: "Clasificación o entrada manual de datos",
+  planning: "Planificación de proyectos o tareas",
   quality_review: "Revisión de calidad / control de errores",
   unclear: "No lo tenemos claro todavía",
 };
@@ -105,8 +116,12 @@ const NEW_BLOCKER_MAP = {
   privacy: "Dudas sobre privacidad / seguridad",
   use_cases: "No vemos aún casos de uso claros",
   data_quality: "Datos desordenados o poco accesibles",
+  system_silos: "Sistemas desconectados / silos",
   process_clarity: "Procesos poco definidos",
   leadership: "Falta de apoyo interno / liderazgo",
+  ownership: "No hay owner claro",
+  measurement: "No sabemos medir impacto / ROI",
+  change_management: "Resistencia al cambio del equipo",
   budget: "Presupuesto limitado",
 };
 
@@ -255,7 +270,7 @@ function calcMetrics(payload) {
   const userScoreMap = { nobody: 0, management: 4, few_people: 8, one_department: 12, several_departments: 18, company_wide: 24 };
   const situationHoursMap = { none: 4.2, individual: 3.4, pilots: 2.7, regular: 1.9, embedded: 1.25 };
   const aiSavingsMap = { none: 0.26, individual: 0.24, pilots: 0.21, regular: 0.17, embedded: 0.13 };
-  const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, finance: 0.22, it_data: 0.2, unclear: 0.26 };
+  const areaCoverage = { sales: 0.32, marketing: 0.28, support: 0.28, ops: 0.42, hr: 0.24, admin: 0.34, management: 0.2, product: 0.24, finance: 0.22, it_data: 0.2, procurement: 0.26, legal: 0.18, unclear: 0.26 };
 
   const parsedEmployees = Number(String(contact.employees || "").replace(/[^\d]/g, ""));
   const team = Math.max(1, Math.min(500, parsedEmployees || 12));
@@ -380,6 +395,14 @@ function rankCourses(payload) {
     add("IA para crear Aplicaciones Web", 6, "hace falta estructurar mejor herramientas internas y procesos");
     add("Automatizaciones con IA", 3, "también hay margen para conectar tareas repetitivas");
   }
+  if (hasArea("procurement")) {
+    add("Automatizaciones con IA", 5, "compras o logística pueden ganar velocidad con flujos y control operativo");
+    add("IA para crear Aplicaciones Web", 3, "puede ayudar a ordenar datos, estados y herramientas internas");
+  }
+  if (hasArea("legal")) {
+    add("IA para crear Aplicaciones Web", 4, "legal o compliance suele necesitar más orden documental y trazabilidad");
+    add("Automatizaciones con IA", 2, "también hay margen en revisión y circuitos internos");
+  }
   if (hasArea("ops") || hasArea("admin") || hasArea("support")) add("Automatizaciones con IA", 6, "la mayor oportunidad está en procesos repetitivos y operativa interna");
   if (hasArea("management")) {
     add("Automatizaciones con IA", 3, "dirección necesita más visibilidad y cadencia operativa");
@@ -394,11 +417,27 @@ function rankCourses(payload) {
     add("IA para Marketing", 4, "hay fricción en prospección y mensajes comerciales");
     add("Automatizaciones con IA", 3, "conviene convertir seguimiento y rutinas en flujos más ágiles");
   }
+  if (hasTask("proposals")) {
+    add("IA para Marketing", 3, "hay margen para acelerar propuestas y argumentarios comerciales");
+    add("Automatizaciones con IA", 3, "conviene estructurar mejor la generación y envío de ofertas");
+  }
+  if (hasTask("crm_erp") || hasTask("data_entry")) {
+    add("Automatizaciones con IA", 5, "hay demasiada actualización manual en sistemas internos");
+    add("IA para crear Aplicaciones Web", 2, "puede ayudar a ordenar entradas, validaciones y vistas internas");
+  }
   if (hasTask("customer_replies") || hasTask("coordination") || hasTask("admin") || hasTask("email_meetings")) add("Automatizaciones con IA", 5, "hay demasiado trabajo manual en coordinación o respuesta repetitiva");
   if (hasTask("training_docs")) add("Productividad con IA para RRHH", 5, "la necesidad pasa por formación y documentación interna");
   if (hasTask("analysis") || hasTask("reports")) {
     add("IA para crear Aplicaciones Web", 4, "hay oportunidad para estructurar reporting y herramientas internas");
     add("Automatizaciones con IA", 2, "también puede reducirse trabajo manual en reporting");
+  }
+  if (hasTask("knowledge_search")) {
+    add("IA para crear Aplicaciones Web", 4, "hay fricción para localizar y reutilizar conocimiento interno");
+    add("Productividad con IA para RRHH", 2, "también mejora la adopción si el equipo encuentra mejor la información");
+  }
+  if (hasTask("planning")) {
+    add("Automatizaciones con IA", 3, "hay margen para ordenar seguimiento, coordinación y ejecución");
+    add("IA para crear Aplicaciones Web", 2, "puede ayudar a estructurar mejor flujos internos y vistas operativas");
   }
   if (hasTask("quality_review")) {
     add("IA Generativa para Imagen y Video", 3, "hay una necesidad clara de elevar calidad de entregables");
@@ -422,14 +461,19 @@ function rankCourses(payload) {
   }
 
   if (hasBlocker("training")) add("Productividad con IA para RRHH", 3, "el bloqueo principal es la capacitación del equipo");
-  if (hasBlocker("tools") || hasBlocker("data_quality") || hasBlocker("process_clarity")) add("IA para crear Aplicaciones Web", 3, "hay que ordenar herramientas, datos o procesos");
+  if (hasBlocker("tools") || hasBlocker("data_quality") || hasBlocker("process_clarity") || hasBlocker("system_silos")) add("IA para crear Aplicaciones Web", 3, "hay que ordenar herramientas, datos o procesos");
   if (hasBlocker("time") || hasBlocker("use_cases")) add("Automatizaciones con IA", 3, "conviene empezar por quick wins muy prácticos");
   if (hasBlocker("budget")) add("Automatizaciones con IA", 2, "permite demostrar retorno sin un rediseño grande");
+  if (hasBlocker("ownership") || hasBlocker("measurement")) add("IA para crear Aplicaciones Web", 2, "hace falta más orden para gobernar iniciativas y medir impacto");
+  if (hasBlocker("change_management")) add("Productividad con IA para RRHH", 3, "la adopción del equipo es un bloqueo real que hay que trabajar");
 
   if (hasTool("canva")) add("IA Generativa para Imagen y Video", 4, "ya existe una base creativa sobre la que escalar");
   if (hasTool("crm_ai")) add("IA para Marketing", 3, "ya usan herramientas comerciales con IA");
   if (hasTool("automations")) add("Automatizaciones con IA", 2, "ya hay una base para profundizar en automatización");
   if (hasTool("notion")) add("Productividad con IA para RRHH", 2, "ya usan asistentes internos que pueden ordenarse mejor");
+  if (hasTool("meeting_ai") || hasTool("internal_agents")) add("Automatizaciones con IA", 2, "ya existe base para escalar flujos internos asistidos");
+  if (hasTool("perplexity")) add("IA para Marketing", 2, "ya hay hábito de research asistido que puede convertirse en proceso");
+  if (hasTool("bi_ai")) add("IA para crear Aplicaciones Web", 3, "ya hay señales de interés en reporting o analítica asistida");
 
   return [...ranking.entries()]
     .map(([name, value]) => ({

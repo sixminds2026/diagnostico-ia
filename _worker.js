@@ -81,6 +81,7 @@ const AI_TOOL_MAP = {
 
 const TASK_MAP = {
   writing: "Redacción de contenidos o documentos",
+  creative_assets: "Creatividades, diseños o piezas visuales",
   analysis: "Análisis de información / datos",
   reports: "Presentaciones, resúmenes o reportes",
   customer_replies: "Atención a clientes / respuestas repetitivas",
@@ -413,6 +414,10 @@ function rankCourses(payload) {
     add("IA para Marketing", 5, "hay carga importante de redacción, contenidos o mensajes");
     add("IA Generativa para Imagen y Video", 3, "la parte creativa puede ganar más velocidad");
   }
+  if (hasTask("creative_assets")) {
+    add("IA Generativa para Imagen y Video", 6, "hay una necesidad directa de acelerar creatividades y producción visual");
+    add("IA para Marketing", 2, "las piezas visuales suelen impactar también en campañas y conversión");
+  }
   if (hasTask("sales_prospecting")) {
     add("IA para Marketing", 4, "hay fricción en prospección y mensajes comerciales");
     add("Automatizaciones con IA", 3, "conviene convertir seguimiento y rutinas en flujos más ágiles");
@@ -582,7 +587,9 @@ Inputs disponibles: objetivo 6-12 meses, áreas de empresa donde la IA podría i
 Reglas críticas:
 - El summary debe tener máximo 60 caracteres. Debe ser una frase corta que explique cómo mejorar el score.
 - Nombra un best_first_move claro y muy concreto: el primer caso de uso que debería activar la empresa según área, tarea, herramientas actuales y horas perdidas.
-- En best_first_move.first_action incluye una acción concreta y una herramienta posible si encaja. Ejemplos: ChatGPT, Copilot, Gemini, Claude, Make, Zapier, n8n, Google Sheets, Google Drive, Canva, OpenAI API.
+- En best_first_move.first_action incluye una acción concreta y una herramienta posible si encaja.
+- No te limites a repetir la herramienta que el usuario ya usa. Si el caso lo justifica, puedes proponer herramientas complementarias y realistas para ese proceso concreto.
+- Ejemplos válidos según el caso: ChatGPT, Copilot, Gemini, Claude, Make, Zapier, n8n, Google Sheets, Google Drive, Canva, Freepik, Figma, Webflow, HubSpot, Airtable, Notion, Slack, Teams, Fireflies, Loom, Runway, OpenAI API.
 - Cada priority debe incluir proceso concreto, síntoma actual, primera intervención realista y efecto de negocio.
 - Cada priority.body debe sentirse adaptado al caso: usa al menos dos señales del input, por ejemplo área + tarea, bloqueador + prioridad, herramienta actual + objetivo, horas perdidas + resultado deseado.
 - Cada priority.first_intervention debe nombrar una acción implementable en 1-2 semanas y, si procede, una herramienta concreta.
@@ -602,12 +609,15 @@ Reglas críticas:
 - No fuerces la mención de formaciones en todas las prioridades; bastan una o dos menciones bien justificadas si encajan.
 
 Lógica de personalización:
-- Si el área incluye marketing: prioriza contenidos, research, campañas, assets, reporting o conversión. Menciona ChatGPT/Claude/Gemini para research y copy, Canva si aparece creatividad, y automatización solo si hay tareas repetitivas claras.
+- Si el área incluye marketing: prioriza contenidos, research, campañas, assets, reporting o conversión. Menciona ChatGPT/Claude/Gemini para research y copy, Canva/Freepik/Figma/Runway si hay producción creativa, Webflow si el cuello de botella está en landings, y automatización solo si hay tareas repetitivas claras.
 - Si el área incluye ventas: prioriza prospección, cualificación, seguimiento, propuestas, CRM ligero o respuesta rápida. Menciona ChatGPT/Claude para mensajes/propuestas y Make/Zapier/n8n solo para flujos repetibles.
 - Si el área incluye atención al cliente: prioriza FAQs, clasificación de consultas, respuestas repetitivas, base de conocimiento y tiempos de respuesta. Menciona ChatGPT/OpenAI API solo si hay volumen y madurez suficiente.
 - Si el área incluye operaciones o administración: prioriza reporting, documentos, coordinación, back office, hojas de cálculo y aprobaciones. Menciona Google Sheets/Drive, Make, Zapier o n8n cuando el stack lo permita.
 - Si el área incluye RRHH: prioriza onboarding, formación interna, documentación, soporte a managers y procesos repetitivos. Evita automatizaciones complejas si falta formación.
 - Si el área incluye dirección/estrategia: prioriza visibilidad, KPIs, síntesis ejecutiva, reporting y priorización por impacto/viabilidad.
+- Si aparecen creatividades, diseño o piezas visuales: no te quedes solo en Canva. Puedes recomendar combinaciones realistas como Freepik para variaciones rápidas, Figma para sistematizar piezas, Runway para vídeo, Webflow para publicar landings o activos si eso encaja con el objetivo.
+- Si aparecen propuestas, presupuestos o seguimiento comercial: puedes mencionar HubSpot, Notion o Airtable si ayudan a estructurar mejor el proceso, siempre explicando para qué.
+- Si aparecen reuniones, documentación o coordinación: puedes mencionar Fireflies, Loom, Slack o Teams si ayudan a capturar contexto, reducir retrabajo o acelerar traspasos.
 - Si la empresa no usa IA o la usa de forma individual: no propongas agentes avanzados. Propón formación aplicada, playbooks, primer caso de uso y medición básica.
 - Si ya usa IA de forma regular o en varios equipos: propón estandarización, ownership, integración ligera y escalado selectivo.
 - Si las herramientas actuales son "No usamos ninguna", recomienda empezar con herramientas accesibles y bajo riesgo, no arquitectura técnica.
@@ -615,7 +625,7 @@ Lógica de personalización:
 
 Evita:
 - Frases como "la IA puede transformar", "oportunidad clara", "optimizar procesos" sin nombrar proceso.
-- Listas de herramientas sin explicar para qué se usarían.
+- Listas de herramientas sin explicar para qué se usarían o por qué encajan con ese proceso.
 - Repetir la misma idea en best_first_move, priorities y roadmap.
 
 Cursos Sixminds:

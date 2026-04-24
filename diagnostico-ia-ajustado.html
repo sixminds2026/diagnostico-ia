@@ -441,6 +441,7 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
   <p class="sub">Selecciona las fricciones más visibles. Aquí sale buena parte de la personalización del diagnóstico.</p>
   <div class="chips" id="chips-tasks">
     <div class="chip" onclick="tog(this,'tasks','writing')">Redacción de contenidos o documentos</div>
+    <div class="chip" onclick="tog(this,'tasks','creative_assets')">Creatividades, diseños o piezas visuales</div>
     <div class="chip" onclick="tog(this,'tasks','analysis')">Análisis de información / datos</div>
     <div class="chip" onclick="tog(this,'tasks','reports')">Presentaciones, resúmenes o reportes</div>
     <div class="chip" onclick="tog(this,'tasks','customer_replies')">Atención a clientes / respuestas repetitivas</div>
@@ -694,6 +695,7 @@ const AI_TOOL_MAP = {
 
 const TASK_MAP = {
   writing: 'Redacción de contenidos o documentos',
+  creative_assets: 'Creatividades, diseños o piezas visuales',
   analysis: 'Análisis de información / datos',
   reports: 'Presentaciones, resúmenes o reportes',
   customer_replies: 'Atención a clientes / respuestas repetitivas',
@@ -1091,6 +1093,18 @@ function formatRichText(value) {
     'Gemini',
     'Claude',
     'Canva',
+    'Freepik',
+    'Figma',
+    'Webflow',
+    'HubSpot',
+    'Airtable',
+    'Notion',
+    'Slack',
+    'Microsoft Teams',
+    'Teams',
+    'Fireflies',
+    'Loom',
+    'Runway',
     'Make',
     'Zapier',
     'n8n',
@@ -1355,6 +1369,10 @@ function rankCourses() {
   if (hasTask('writing')) {
     add('IA para Marketing', 5, 'hay carga importante de redacción, contenidos o mensajes');
     add('IA Generativa para Imagen y Video', 3, 'la parte creativa puede ganar más velocidad');
+  }
+  if (hasTask('creative_assets')) {
+    add('IA Generativa para Imagen y Video', 6, 'hay una necesidad directa de acelerar creatividades y producción visual');
+    add('IA para Marketing', 2, 'las piezas visuales suelen impactar también en campañas y conversión');
   }
   if (hasTask('sales_prospecting')) {
     add('IA para Marketing', 4, 'hay fricción en prospección y mensajes comerciales');

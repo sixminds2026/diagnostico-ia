@@ -30,16 +30,21 @@
 html{scroll-behavior:smooth}
 body{font-family:var(--f);background:radial-gradient(circle at top,rgba(117,251,146,0.1),transparent 26%),var(--bg);color:var(--w);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-size:18px}
 
+/* Topbar */
+.topbar{position:fixed;top:0;left:0;right:0;height:76px;display:flex;align-items:center;z-index:320;background:rgba(7,7,7,0.94);backdrop-filter:blur(10px);border-bottom:1px solid rgba(117,251,146,0.12)}
+.topbar-inner{width:100%;max-width:1380px;margin:0 auto;padding:0 28px;display:flex;align-items:center}
+.topbar-logo{display:block;height:34px;width:auto;object-fit:contain}
+
 /* Progress */
-.prog-wrap{position:fixed;top:0;left:0;right:0;height:1.5px;background:var(--ln);z-index:300}
+.prog-wrap{position:fixed;top:76px;left:0;right:0;height:1.5px;background:var(--ln);z-index:300}
 .prog-bar{height:100%;background:var(--g);transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px rgba(117,251,146,.35)}
-.prog-label{position:fixed;top:18px;right:24px;font-size:13px;font-weight:500;color:var(--w3);z-index:300;letter-spacing:.06em;display:none}
+.prog-label{position:fixed;top:94px;right:24px;font-size:13px;font-weight:500;color:var(--w3);z-index:300;letter-spacing:.06em;display:none}
 
 /* Steps */
-.step{display:none;min-height:100vh;padding:52px 40px 44px;max-width:1080px;margin:0 auto;width:100%;flex-direction:column;justify-content:flex-start}
+.step{display:none;min-height:100vh;padding:128px 40px 44px;max-width:1080px;margin:0 auto;width:100%;flex-direction:column;justify-content:flex-start}
 .step#s0,.step#s-loading{justify-content:center}
-.step#s-results{max-width:1380px;padding-left:48px;padding-right:48px}
-.step#s-followup{max-width:1160px}
+.step#s-results{max-width:1380px;padding-top:128px;padding-left:48px;padding-right:48px}
+.step#s-followup{max-width:1160px;padding-top:128px}
 .step.on{display:flex;animation:up .38s cubic-bezier(.4,0,.2,1) both}
 @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
@@ -227,7 +232,12 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
   .stats{flex-wrap:wrap;gap:16px}
   .stat{padding-right:0}
   .stat+.stat{border-left:none;padding-left:0}
-  .step,.step#s-results,.step#s-followup{padding:42px 18px 32px}
+  .topbar{height:68px}
+  .topbar-inner{padding:0 18px}
+  .topbar-logo{height:28px}
+  .prog-wrap{top:68px}
+  .prog-label{top:82px;right:18px}
+  .step,.step#s-results,.step#s-followup{padding:110px 18px 32px}
   .cta-btns{flex-direction:column}
   .cta-btns .btn{width:100%}
   .rphase-items{padding-left:0;margin-top:8px}
@@ -239,6 +249,11 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
 </head>
 <body>
 
+<div class="topbar">
+  <div class="topbar-inner">
+    <img class="topbar-logo" src="logosixminds.png" alt="Sixminds">
+  </div>
+</div>
 <div class="prog-wrap"><div class="prog-bar" id="pb" style="width:0%"></div></div>
 <div class="prog-label" id="pl"></div>
 

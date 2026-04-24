@@ -242,6 +242,7 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
   <div class="pill"><div class="dot"></div>Diagnóstico gratuito · 4 minutos</div>
   <h1>¿Cuánto está costando la falta de IA a tu empresa?</h1>
   <p class="sub">Responde 10 preguntas estratégicas y obtén una lectura ejecutiva de madurez IA.</p>
+  <p class="sub" style="margin-bottom:18px;max-width:760px">Con este diagnóstico obtendrás:</p>
   <ul class="intro-points">
     <li>Siguiente paso más lógico</li>
     <li>Prioridades reales</li>
@@ -554,12 +555,8 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
     <input type="checkbox" id="fprivacy" onchange="chkForm()">
     <span class="check-copy">Acepto las condiciones de uso y política de privacidad <span style="color:var(--g)">*</span></span>
   </label>
-  <label class="check-field">
-    <input type="checkbox" id="fcomms">
-    <span class="check-copy">Acepto recibir comunicaciones promocionales relacionadas con productos, servicios o actividades.</span>
-  </label>
   <button class="btn btn-green btn-full" id="bsubmit" disabled onclick="runAnalysis()">Generar mi diagnóstico con IA</button>
-  <p class="fnote">Te mostraremos el diagnóstico en pantalla y podremos enviarte recomendaciones relacionadas. Sin spam.</p>
+  <p class="fnote">Te mostraremos el diagnóstico en pantalla. Sin spam.</p>
 </div>
 
 <!-- LOADING -->
@@ -839,7 +836,6 @@ function chkForm() {
   const n = fieldValue('fname');
   const c = fieldValue('fcompany');
   const e = fieldValue('femail');
-  const phone = fieldValue('fphone');
   const role = fieldValue('frole');
   const employees = fieldValue('femployees');
   const p = document.getElementById('fprivacy').checked;
@@ -869,7 +865,7 @@ function buildAnalyzePayload() {
       phone: fieldValue('fphone'),
       role: fieldValue('frole'),
       employees: fieldValue('femployees'),
-      comms: !!document.getElementById('fcomms')?.checked
+      comms: false
     },
     desiredOutcome: fieldValue('foutcome'),
     followupAnswers: { ...S.followupAnswers }

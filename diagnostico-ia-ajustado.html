@@ -625,7 +625,7 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
 </div>
 
 <!-- RESULTS -->
-<div class="step" id="s-results" style="padding-top:52px;padding-bottom:52px;min-height:auto"></div>
+<div class="step" id="s-results" style="padding-bottom:52px;min-height:auto"></div>
 
 </div><!-- /app -->
 
@@ -1730,7 +1730,14 @@ function sendH(force = false) {
 }
 
 function reset() {
-  window.location.reload();
+  S.lastPostedHeight = 0;
+  if (window.parent !== window) {
+    try {
+      window.parent.postMessage({ type: 'iframeHeight', height: 0 }, '*');
+      window.parent.postMessage({ type: 'iframeScrollTop' }, '*');
+    } catch (error) {}
+  }
+  window.location.replace(window.location.pathname + window.location.search + window.location.hash);
 }
 
 window.addEventListener('load', () => {

@@ -49,6 +49,9 @@ body{font-family:var(--f);background:radial-gradient(circle at top,rgba(117,251,
 h1{font-size:clamp(42px,6vw,68px);font-weight:500;line-height:1.06;letter-spacing:-.026em;margin-bottom:22px;color:var(--w)}
 h2{font-size:clamp(28px,3.7vw,42px);font-weight:500;line-height:1.1;letter-spacing:-.02em;margin-bottom:16px;color:var(--w)}
 .sub{font-size:18px;color:var(--w6);line-height:1.66;margin-bottom:28px;max-width:760px;font-weight:400}
+.intro-points{list-style:none;display:flex;flex-direction:column;gap:10px;margin:0 0 30px;padding:0;max-width:760px}
+.intro-points li{font-size:18px;line-height:1.65;color:var(--w);display:flex;align-items:flex-start;gap:12px}
+.intro-points li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--g);flex-shrink:0;margin-top:11px}
 .hl{color:var(--g)}
 
 /* Intro pill */
@@ -123,8 +126,8 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
 .stats{display:flex;gap:0;margin-top:48px;border-top:1px solid var(--ln);padding-top:28px}
 .stat{flex:1;padding-right:20px}
 .stat+.stat{padding-left:20px;padding-right:20px;border-left:1px solid var(--ln)}
-.stat-n{font-size:32px;font-weight:500;color:var(--g);letter-spacing:-.03em;line-height:1;margin-bottom:5px}
-.stat-l{font-size:14px;color:var(--w6);line-height:1.5;font-weight:400}
+.stat-n{font-size:38px;font-weight:500;color:var(--g);letter-spacing:-.03em;line-height:1;margin-bottom:8px}
+.stat-l{font-size:16px;color:var(--w);line-height:1.55;font-weight:400}
 
 /* Loading */
 #step-loading{text-align:center;padding:80px 28px}
@@ -150,8 +153,8 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
 .score-diagnosis{border-top:1px solid rgba(117,251,146,0.22);padding-top:22px}
 .score-diagnosis h3{font-size:24px;font-weight:500;line-height:1.18;letter-spacing:-.025em;color:var(--w);margin-bottom:10px}
 .score-diagnosis p{font-size:16px;line-height:1.7;color:var(--w);font-weight:400}
-.report-actions{display:flex;flex-direction:column;gap:12px}
-.report-actions .btn{width:100%;justify-content:center}
+.report-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.report-actions .btn{flex:1 1 240px;justify-content:center}
 .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .mcard{padding:28px;border-color:rgba(117,251,146,0.18)}
 .mcard.accent{border-color:rgba(117,251,146,0.42);background:rgba(117,251,146,0.1)}
@@ -238,8 +241,13 @@ input::placeholder,textarea::placeholder{color:var(--w1)}
 <div class="step on" id="s0">
   <div class="pill"><div class="dot"></div>Diagnóstico gratuito · 4 minutos</div>
   <h1>¿Cuánto está costando la falta de IA a tu empresa?</h1>
-  <p class="sub">Responde 10 preguntas estratégicas y obtén una lectura ejecutiva de madurez IA: prioridades reales, primer caso de uso recomendado, plan 30/60/90 y siguiente paso más lógico.</p>
-  <button class="btn btn-green" style="font-size:16px;padding:16px 36px" onclick="go(1)">Iniciar diagnóstico</button>
+  <p class="sub">Responde 10 preguntas estratégicas y obtén una lectura ejecutiva de madurez IA.</p>
+  <ul class="intro-points">
+    <li>Siguiente paso más lógico</li>
+    <li>Prioridades reales</li>
+    <li>Roadmap 30 / 60 / 90</li>
+  </ul>
+  <button class="btn btn-green" style="font-size:16px;padding:16px 28px;align-self:flex-start" onclick="go(1)">Iniciar diagnóstico</button>
   <div class="stats">
     <div class="stat"><div class="stat-n">73%</div><div class="stat-l">de empresas infrautilizan la IA a día de hoy</div></div>
     <div class="stat"><div class="stat-n">14h</div><div class="stat-l">perdidas por persona y semana en tareas manuales</div></div>
@@ -1205,101 +1213,126 @@ function resolveCourseUrl(name, fallbackUrl = APP_URLS.courses) {
   return COURSE_URLS[name] || fallbackUrl;
 }
 
-function selectSpecializedCourse() {
+function rankCourses() {
   const areas = S.chips.areas ? [...S.chips.areas] : [];
   const tasks = S.chips.tasks ? [...S.chips.tasks] : [];
   const blockers = S.chips.blockers ? [...S.chips.blockers] : [];
+  const tools = S.chips.ai_tools ? [...S.chips.ai_tools] : [];
+  const objective = S.a.objective?.val || '';
+  const priority = S.a.priority?.val || '';
   const hasArea = value => areas.includes(value);
   const hasTask = value => tasks.includes(value);
   const hasBlocker = value => blockers.includes(value);
-  let name = 'Automatizaciones con IA';
-  let reason = 'Encaja porque el diagnóstico apunta a reducir fricción operativa con flujos concretos, automatización de tareas repetitivas y una implantación práctica sin rediseñar toda la empresa.';
+  const hasTool = value => tools.includes(value);
+  const ranking = new Map(COURSE_NAMES.map(name => [name, { score: 0, reasons: [] }]));
 
-  if (hasArea('hr') || hasTask('training_docs')) {
-    name = 'Productividad con IA para RRHH';
-    reason = 'Es el curso más útil porque la oportunidad principal está en onboarding, documentación interna, formación del equipo y adopción práctica de IA.';
-  } else if (hasArea('marketing') || hasTask('writing')) {
-    name = 'IA para Marketing';
-    reason = 'Encaja porque el frente prioritario toca contenido, campañas, research, conversión o productividad del equipo de marketing.';
-  } else if (hasTask('writing') && (S.a.objective?.val === 'quality' || hasArea('product'))) {
-    name = 'IA Generativa para Imagen y Video';
-    reason = 'Tiene sentido cuando la mejora buscada pasa por acelerar producción creativa, activos visuales y entregables de mayor calidad.';
-  } else if (hasArea('product') || hasBlocker('tools') || hasTask('admin')) {
-    name = 'IA para crear Aplicaciones Web';
-    reason = 'Es útil si el caso apunta a prototipar herramientas internas, interfaces o aplicaciones ligeras para resolver procesos concretos.';
+  const add = (name, pts, reason) => {
+    const item = ranking.get(name);
+    if (!item) return;
+    item.score += pts;
+    if (reason && !item.reasons.includes(reason)) item.reasons.push(reason);
+  };
+
+  if (hasArea('marketing')) {
+    add('IA para Marketing', 6, 'el foco principal está en marketing');
+    add('IA Generativa para Imagen y Video', 3, 'hay margen para acelerar la producción visual');
+  }
+  if (hasArea('sales')) {
+    add('Automatizaciones con IA', 5, 'ventas necesita más velocidad en seguimiento y tareas repetitivas');
+    add('IA para Marketing', 3, 'parte del impacto buscado toca mensajes, demanda y conversión');
+  }
+  if (hasArea('hr')) {
+    add('Productividad con IA para RRHH', 7, 'RRHH aparece como área prioritaria');
+    add('Automatizaciones con IA', 2, 'también hay procesos internos que pueden simplificarse');
+  }
+  if (hasArea('product') || hasArea('it_data') || hasArea('finance')) {
+    add('IA para crear Aplicaciones Web', 6, 'hace falta estructurar mejor herramientas internas y procesos');
+    add('Automatizaciones con IA', 3, 'también hay margen para conectar tareas repetitivas');
+  }
+  if (hasArea('ops') || hasArea('admin') || hasArea('support')) {
+    add('Automatizaciones con IA', 6, 'la mayor oportunidad está en procesos repetitivos y operativa interna');
+  }
+  if (hasArea('management')) {
+    add('Automatizaciones con IA', 3, 'dirección necesita más visibilidad y cadencia operativa');
+    add('IA para crear Aplicaciones Web', 2, 'puede ayudar a ordenar reporting y herramientas internas');
   }
 
-  return { name, reason, url: resolveCourseUrl(name) };
-}
-
-function complementaryCourse(primary) {
-  const areas = S.chips.areas ? [...S.chips.areas] : [];
-  const tasks = S.chips.tasks ? [...S.chips.tasks] : [];
-  const hasArea = value => areas.includes(value);
-  const hasTask = value => tasks.includes(value);
-  let name = 'Automatizaciones con IA';
-  let reason = 'Complementa el diagnóstico porque convierte el aprendizaje en flujos concretos, reduce trabajo manual y permite medir impacto operativo con rapidez.';
-
-  if (primary.name === 'Automatizaciones con IA') {
-    if (hasArea('marketing') || hasTask('writing') || hasTask('sales_prospecting')) {
-      name = 'IA para Marketing';
-      reason = 'Complementa la automatización con casos de uso de campañas, contenido, research y conversión para que el equipo active IA en el frente comercial y de demanda.';
-    } else if (hasArea('hr') || hasTask('training_docs')) {
-      name = 'Productividad con IA para RRHH';
-      reason = 'Complementa la automatización con adopción práctica en formación interna, documentación y soporte a managers, donde el equipo puede capturar valor sin complejidad técnica.';
-    } else if (hasArea('product') || hasTask('admin')) {
-      name = 'IA para crear Aplicaciones Web';
-      reason = 'Complementa la automatización con capacidad para prototipar herramientas internas e interfaces ligeras conectadas a procesos reales.';
-    }
-  } else if (primary.name === 'IA para Marketing' && hasTask('writing')) {
-    name = 'IA Generativa para Imagen y Video';
-    reason = 'Refuerza la parte visual y creativa de campañas, ecommerce y producción de activos, que suele ser un cuello de botella cuando marketing quiere escalar con IA.';
+  if (hasTask('writing')) {
+    add('IA para Marketing', 5, 'hay carga importante de redacción, contenidos o mensajes');
+    add('IA Generativa para Imagen y Video', 3, 'la parte creativa puede ganar más velocidad');
+  }
+  if (hasTask('sales_prospecting')) {
+    add('IA para Marketing', 4, 'hay fricción en prospección y mensajes comerciales');
+    add('Automatizaciones con IA', 3, 'conviene convertir seguimiento y rutinas en flujos más ágiles');
+  }
+  if (hasTask('customer_replies') || hasTask('coordination') || hasTask('admin') || hasTask('email_meetings')) {
+    add('Automatizaciones con IA', 5, 'hay demasiado trabajo manual en coordinación o respuesta repetitiva');
+  }
+  if (hasTask('training_docs')) add('Productividad con IA para RRHH', 5, 'la necesidad pasa por formación y documentación interna');
+  if (hasTask('analysis') || hasTask('reports')) {
+    add('IA para crear Aplicaciones Web', 4, 'hay oportunidad para estructurar reporting y herramientas internas');
+    add('Automatizaciones con IA', 2, 'también puede reducirse trabajo manual en reporting');
+  }
+  if (hasTask('quality_review')) {
+    add('IA Generativa para Imagen y Video', 3, 'hay una necesidad clara de elevar calidad de entregables');
+    add('IA para Marketing', 2, 'puede mejorar consistencia y output del equipo');
   }
 
-  if (name === primary.name) {
-    name = 'Automatizaciones con IA';
-    reason = 'Complementa el curso principal llevando los casos de uso a flujos repetibles, conectados y medibles dentro de la operativa diaria.';
+  if (objective === 'sales_leads') add('IA para Marketing', 4, 'el objetivo principal es generar más ventas o leads');
+  if (objective === 'quality') add('IA Generativa para Imagen y Video', 4, 'el objetivo central es mejorar la calidad del trabajo');
+  if (objective === 'save_time' || objective === 'reduce_costs' || objective === 'speed_processes') add('Automatizaciones con IA', 4, 'la prioridad es ahorrar tiempo y reducir fricción');
+  if (objective === 'productivity') {
+    add('Automatizaciones con IA', 2, 'la productividad mejora cuando se elimina trabajo repetitivo');
+    add('Productividad con IA para RRHH', 2, 'la adopción interna también condiciona la productividad');
   }
 
-  return { name, reason, url: resolveCourseUrl(name) };
+  if (priority === 'training') add('Productividad con IA para RRHH', 3, 'hay prioridad clara en formación y adopción');
+  if (priority === 'automate') add('Automatizaciones con IA', 5, 'la prioridad declarada es automatizar tareas');
+  if (priority === 'tools' || priority === 'department_roadmap' || priority === 'adoption_strategy') add('IA para crear Aplicaciones Web', 3, 'hay que estructurar herramientas y despliegue');
+  if (priority === 'use_cases') {
+    add('Automatizaciones con IA', 2, 'sirve para aterrizar casos de uso operativos');
+    add('IA para Marketing', 2, 'puede convertir oportunidades comerciales en casos concretos');
+  }
+
+  if (hasBlocker('training')) add('Productividad con IA para RRHH', 3, 'el bloqueo principal es la capacitación del equipo');
+  if (hasBlocker('tools') || hasBlocker('data_quality') || hasBlocker('process_clarity')) add('IA para crear Aplicaciones Web', 3, 'hay que ordenar herramientas, datos o procesos');
+  if (hasBlocker('time') || hasBlocker('use_cases')) add('Automatizaciones con IA', 3, 'conviene empezar por quick wins muy prácticos');
+  if (hasBlocker('budget')) add('Automatizaciones con IA', 2, 'permite demostrar retorno sin un rediseño grande');
+
+  if (hasTool('canva')) add('IA Generativa para Imagen y Video', 4, 'ya existe una base creativa sobre la que escalar');
+  if (hasTool('crm_ai')) add('IA para Marketing', 3, 'ya usan herramientas comerciales con IA');
+  if (hasTool('automations')) add('Automatizaciones con IA', 2, 'ya hay una base para profundizar en automatización');
+  if (hasTool('notion')) add('Productividad con IA para RRHH', 2, 'ya usan asistentes internos que pueden ordenarse mejor');
+
+  return [...ranking.entries()]
+    .map(([name, value]) => ({
+      name,
+      score: value.score,
+      reason: value.reasons.slice(0, 2).join(' y ') || 'encaja con las prioridades detectadas en el diagnóstico',
+      url: resolveCourseUrl(name)
+    }))
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 }
 
 function selectSpecializedCourses() {
-  const primary = selectSpecializedCourse();
-  const secondary = complementaryCourse(primary);
-  return [primary, secondary].filter((course, index, list) =>
-    course && list.findIndex(item => item.name === course.name) === index
-  ).slice(0, 2);
+  return rankCourses().slice(0, 2).map(course => ({
+    name: course.name,
+    reason: `Se recomienda porque ${course.reason}.`,
+    url: course.url
+  }));
 }
 
 function normalizeCourses(data) {
-  const fallbackCourses = selectSpecializedCourses();
+  const rankedCourses = selectSpecializedCourses();
   const raw = Array.isArray(data.courses) ? data.courses : [];
-  const normalized = raw
-    .filter(course => course && COURSE_NAMES.includes(course.name))
-    .map(course => ({
+  return rankedCourses.map(course => {
+    const aiMatch = raw.find(item => item && item.name === course.name);
+    return {
       name: course.name,
-      reason: course.reason || fallbackCourses.find(item => item.name === course.name)?.reason || 'Formación recomendada para acelerar la implantación.',
-      url: resolveCourseUrl(course.name)
-    }));
-
-  fallbackCourses.forEach(course => {
-    if (normalized.length < 2 && !normalized.some(item => item.name === course.name)) {
-      normalized.push(course);
-    }
+      reason: aiMatch?.reason || course.reason,
+      url: course.url
+    };
   });
-
-  COURSE_NAMES.forEach(name => {
-    if (normalized.length < 2 && !normalized.some(item => item.name === name)) {
-      normalized.push({
-        name,
-        reason: 'Complementa el plan aportando una capacidad práctica adicional para convertir el diagnóstico en ejecución real.',
-        url: resolveCourseUrl(name)
-      });
-    }
-  });
-
-  return normalized.slice(0, 2);
 }
 
 function getMetricsBundle(data) {
@@ -1313,7 +1346,7 @@ function deriveCta(score) {
 
   if (strategicNeed || score < 35) {
     return {
-      primary: 'Programar consulta',
+      primary: 'Agenda una reunión',
       secondary: 'Ver cursos',
       primaryType: 'call',
       secondaryType: 'course',
@@ -1323,7 +1356,7 @@ function deriveCta(score) {
 
   return {
     primary: 'Ver cursos',
-    secondary: 'Programar consulta',
+    secondary: 'Agenda una reunión',
     primaryType: 'course',
     secondaryType: 'call',
     note: 'El siguiente paso natural es convertir el diagnóstico en capacidad práctica del equipo.'
@@ -1340,6 +1373,10 @@ function ensureResultsShell() {
           <div class="tag" style="justify-content:flex-start">Mejor primer movimiento — <span id="r-company" class="report-company"></span></div>
           <div class="report-headline" id="r-best-title"></div>
           <div class="report-summary" id="r-best-copy"></div>
+          <div class="report-actions">
+            <button onclick="handlePrimaryCta()" class="btn btn-green" id="r-primary-cta">Agenda una reunión</button>
+            <button onclick="handleSecondaryCta()" class="btn btn-outline-g" id="r-secondary-cta">Ver cursos</button>
+          </div>
         </div>
         <div class="dashboard-card report-score-card">
           <div class="score-card-top">
@@ -1357,10 +1394,6 @@ function ensureResultsShell() {
           <div class="score-diagnosis">
             <div class="score-kicker">Qué significa y cómo mejorarlo</div>
             <p id="r-summary"></p>
-          </div>
-          <div class="report-actions">
-            <button onclick="handlePrimaryCta()" class="btn btn-green" id="r-primary-cta">Reservar reunión</button>
-            <button onclick="handleSecondaryCta()" class="btn btn-outline-g" id="r-secondary-cta">Ver cursos</button>
           </div>
         </div>
       </div>
@@ -1384,7 +1417,7 @@ function ensureResultsShell() {
         <div class="section-head" style="margin-top:22px">Formaciones de Sixminds</div>
         <div class="courses-grid" id="r-courses"></div>
           <div class="results-actions">
-            <button onclick="handlePrimaryCta()" class="btn btn-green" id="r-primary-cta-secondary">Reservar reunión</button>
+            <button onclick="handlePrimaryCta()" class="btn btn-green" id="r-primary-cta-secondary">Agenda una reunión</button>
             <button onclick="handleSecondaryCta()" class="btn btn-outline-g" id="r-secondary-cta-secondary">Ver cursos</button>
           </div>
         </div>

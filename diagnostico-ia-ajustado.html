@@ -1257,6 +1257,9 @@ async function runAnalysis(forceFinal = false) {
     const payload = buildAnalyzePayload();
     payload.forceFinal = forceFinal;
     data = await askOpenAI(payload);
+    if (data?.activeCampaignError) {
+      console.error('ActiveCampaign submit failed:', data.activeCampaignError);
+    }
     trackEvent('diagnostico_analysis_success', { source: data.source || 'server' });
   } catch (e) {
     console.error('Server analysis failed:', e);

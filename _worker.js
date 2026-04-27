@@ -18,6 +18,19 @@ const AC_CONFIG = {
   commsLabel: "Acepto recibir de INESDI comunicaciones promocionales de productos y/o actividades de terceras entidades.",
 };
 
+// Fill these ActiveCampaign custom field IDs once they exist in the form builder.
+// Example: score: "31" means submitLead will send field[31] with the diagnosis score.
+const AC_DIAG_FIELD_MAP = {
+  score: "",
+  benchmark: "",
+  summary: "",
+  bestFirstMove: "",
+  priorities: "",
+  roadmap: "",
+  courses: "",
+  cta: "",
+};
+
 const OBJECTIVE_MAP = {
   save_time: "Ahorrar tiempo en tareas repetitivas",
   productivity: "Mejorar la productividad del equipo",
@@ -171,6 +184,25 @@ function deriveAcSector(payload) {
     legal: "Legal / compliance",
   };
   return sectorMap[mainArea] || "No indicado";
+}
+
+function buildAcDiagnosisFields(analysis) {
+  const priorities = Array.isArray(analysis?.priorities) ? analysis.priorities.slice(0, 3) : [];
+  const roadmap = Array.isArray(analysis?.roadmap) ? analysis.roadmap.slice(0, 3) : [];
+  const courses = Array.isArray(analysis?.courses) ? analysis.courses.slice(0, 2) : [];
+  const cta = analysis?.cta || {};
+  const bestMove = analysis?.best_first_move || {};
+
+  return {
+    score: analysis?.score ? String(analysis.score) : "",
+    benchmark: analysis?.benchmark || "",
+    summary: analysis?.summary || "",
+    bestFirstMove: [bestMove.title, bestMove.process, bestMove.first_action].filter(Boolean).join(" | "),
+    priorities: priorities.map((item, index) => `${index + 1}. ${item.title}: ${item.body}`).join("\n"),
+    roadmap: roadmap.map(item => `${item.phase} - ${item.title}: ${(item.actions || []).join(", ")}`).join("\n"),
+    courses: courses.map(item => item.name).join(", "),
+    cta: [cta?.primary?.label, cta?.secondary?.label].filter(Boolean).join(" | "),
+  };
 }
 
 const DIAGNOSIS_SCHEMA = {
@@ -717,25 +749,42 @@ async function askModel(payload, metrics, env) {
   return JSON.parse(raw);
 }
 
-async function submitLead(payload) {
+async function submitLead(payload, analysis = null) {
   const contact = payload.contact || {};
-  const form = new URLSearchParams();
+  const form = new FormData();
   Object.entries(AC_CONFIG.hidden).forEach(([key, value]) => form.append(key, value));
   form.append("fullname", contact.name || "");
   form.append("email", contact.email || "");
-  if (contact.phone) form.append("phone", contact.phone);
+  form.append("phone", contact.phone || "");
   form.append("field[27]", contact.company || "");
   form.append("field[30]", contact.role || "");
   form.append("field[29]", deriveAcSector(payload));
   form.append("field[28]", bucketEmployees(contact.employees));
+  form.append("field[5][]", "~|");
   form.append("field[5][]", AC_CONFIG.privacyLabel);
+  form.append("field[6][]", "~|");
   if (contact.comms) form.append("field[6][]", AC_CONFIG.commsLabel);
 
-  await fetch(AC_CONFIG.action, {
+  if (analysis) {
+    const diagnosisFields = buildAcDiagnosisFields(analysis);
+    Object.entries(AC_DIAG_FIELD_MAP).forEach(([key, fieldId]) => {
+      if (!fieldId || !diagnosisFields[key]) return;
+      form.append(`field[${fieldId}]`, diagnosisFields[key]);
+    });
+  }
+
+  const response = await fetch(`${AC_CONFIG.action}?jsonp=true`, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: form.toString(),
+    headers: { Accept: "application/json" },
+    body: form,
   });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`activecampaign_http_${response.status}${detail ? `:${detail}` : ""}`);
+  }
+
+  return response.text().catch(() => "");
 }
 
 async function handleAnalyze(request, env) {
@@ -764,9 +813,9 @@ async function handleAnalyze(request, env) {
   analysis.benchmark = analysis.benchmark || metrics.benchmark;
   analysis.courses = normalizeCourses(payload, analysis);
 
-  await submitLead(payload).catch(error => console.error("activecampaign_error", error.message));
+  const activeCampaignError = await submitLead(payload, analysis).then(() => null).catch(error => error.message);
 
-  return json(200, analysis);
+  return json(200, { ...analysis, activeCampaignError });
 }
 
 export default {

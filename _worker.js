@@ -18,6 +18,9 @@ const AC_CONFIG = {
   commsLabel: "Acepto recibir de INESDI comunicaciones promocionales de productos y/o actividades de terceras entidades.",
 };
 
+const AC_PRIVACY_LABEL = "Acepto las condiciones de uso y pol\u00edtica de privacidad";
+const AC_COMMS_LABEL = "Acepto recibir de INESDI comunicaciones promocionales de productos y/o actividades de terceras entidades (tanto propias del Grupo Planeta como ajenas).";
+
 // Fill these ActiveCampaign custom field IDs once they exist in the form builder.
 // Example: score: "31" means submitLead will send field[31] with the diagnosis score.
 const AC_DIAG_FIELD_MAP = {
@@ -159,6 +162,7 @@ const COURSE_URLS = {
 const COURSE_NAMES = Object.keys(COURSE_URLS);
 
 function bucketEmployees(value) {
+  if (["1-9", "10-49", "50-249", "+250"].includes(String(value || ""))) return String(value);
   const count = Number(String(value || "").replace(/[^\d]/g, ""));
   if (!count || count <= 9) return "1-9";
   if (count <= 49) return "10-49";
@@ -167,8 +171,7 @@ function bucketEmployees(value) {
 }
 
 function deriveAcSector(payload) {
-  const areas = payload?.chips?.areas || [];
-  const mainArea = areas.find(item => item && item !== "unclear") || "";
+  const areas = (payload?.chips?.areas || []).filter(item => item && item !== "unclear");
   const sectorMap = {
     marketing: "Marketing",
     sales: "Ventas",
@@ -183,7 +186,8 @@ function deriveAcSector(payload) {
     procurement: "Compras / logística",
     legal: "Legal / compliance",
   };
-  return sectorMap[mainArea] || "No indicado";
+  const labels = areas.map(item => sectorMap[item]).filter(Boolean);
+  return labels.length ? labels.join(", ") : "No indicado";
 }
 
 function buildAcDiagnosisFields(analysis) {
@@ -751,7 +755,7 @@ async function askModel(payload, metrics, env) {
 
 async function submitLead(payload, analysis = null) {
   const contact = payload.contact || {};
-  const form = new FormData();
+  const form = new URLSearchParams();
   Object.entries(AC_CONFIG.hidden).forEach(([key, value]) => form.append(key, value));
   form.append("fullname", contact.name || "");
   form.append("email", contact.email || "");
@@ -761,9 +765,9 @@ async function submitLead(payload, analysis = null) {
   form.append("field[29]", deriveAcSector(payload));
   form.append("field[28]", bucketEmployees(contact.employees));
   form.append("field[5][]", "~|");
-  form.append("field[5][]", AC_CONFIG.privacyLabel);
+  form.append("field[5][]", AC_PRIVACY_LABEL);
   form.append("field[6][]", "~|");
-  if (contact.comms) form.append("field[6][]", AC_CONFIG.commsLabel);
+  if (contact.comms) form.append("field[6][]", AC_COMMS_LABEL);
 
   if (analysis) {
     const diagnosisFields = buildAcDiagnosisFields(analysis);
@@ -773,10 +777,10 @@ async function submitLead(payload, analysis = null) {
     });
   }
 
-  const response = await fetch(`${AC_CONFIG.action}?jsonp=true`, {
-    method: "POST",
-    headers: { Accept: "application/json" },
-    body: form,
+  const query = form.toString();
+  const response = await fetch(`${AC_CONFIG.action}?${query}&jsonp=true`, {
+    method: "GET",
+    headers: { Accept: "application/json, text/javascript, */*" },
   });
 
   if (!response.ok) {
@@ -784,7 +788,11 @@ async function submitLead(payload, analysis = null) {
     throw new Error(`activecampaign_http_${response.status}${detail ? `:${detail}` : ""}`);
   }
 
-  return response.text().catch(() => "");
+  const raw = await response.text().catch(() => "");
+  if (/submission failed|_show_error|This field is required|Please select an option/i.test(raw)) {
+    throw new Error(`activecampaign_submit_rejected:${raw.slice(0, 280)}`);
+  }
+  return raw;
 }
 
 async function handleAnalyze(request, env) {

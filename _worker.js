@@ -12,7 +12,7 @@ const AC_CONFIG = {
     m: "0",
     act: "sub",
     v: "2",
-    or: "038dd2fa-972d-4d9e-b650-358545f15671",
+    or: "48e16451-12a4-47ca-a0fc-09b468274299",
   },
   privacyLabel: "Acepto las condiciones de uso y política de privacidad",
   commsLabel: "Acepto recibir de INESDI comunicaciones promocionales de productos y/o actividades de terceras entidades.",
@@ -144,6 +144,34 @@ const COURSE_URLS = {
   "Productividad con IA para RRHH": "https://www.sixminds.com/curso-especializado-en-productividad-de-la-inteligencia-artificial-para-rhh",
 };
 const COURSE_NAMES = Object.keys(COURSE_URLS);
+
+function bucketEmployees(value) {
+  const count = Number(String(value || "").replace(/[^\d]/g, ""));
+  if (!count || count <= 9) return "1-9";
+  if (count <= 49) return "10-49";
+  if (count <= 249) return "50-249";
+  return "+250";
+}
+
+function deriveAcSector(payload) {
+  const areas = payload?.chips?.areas || [];
+  const mainArea = areas.find(item => item && item !== "unclear") || "";
+  const sectorMap = {
+    marketing: "Marketing",
+    sales: "Ventas",
+    support: "Atención al cliente",
+    ops: "Operaciones",
+    hr: "RRHH",
+    admin: "Administración / back office",
+    management: "Dirección / estrategia",
+    product: "Producto / innovación",
+    finance: "Finanzas / control de gestión",
+    it_data: "IT / datos",
+    procurement: "Compras / logística",
+    legal: "Legal / compliance",
+  };
+  return sectorMap[mainArea] || "No indicado";
+}
 
 const DIAGNOSIS_SCHEMA = {
   type: "object",
@@ -698,7 +726,8 @@ async function submitLead(payload) {
   if (contact.phone) form.append("phone", contact.phone);
   form.append("field[27]", contact.company || "");
   form.append("field[30]", contact.role || "");
-  form.append("field[28]", contact.employees || "");
+  form.append("field[29]", deriveAcSector(payload));
+  form.append("field[28]", bucketEmployees(contact.employees));
   form.append("field[5][]", AC_CONFIG.privacyLabel);
   if (contact.comms) form.append("field[6][]", AC_CONFIG.commsLabel);
 

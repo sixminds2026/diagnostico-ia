@@ -190,6 +190,19 @@ function deriveAcSector(payload) {
   return labels.length ? labels.join(", ") : "No indicado";
 }
 
+function buildAcDebug(payload) {
+  const contact = payload?.contact || {};
+  return {
+    company: contact.company || "",
+    role: contact.role || "",
+    sector: deriveAcSector(payload),
+    employees: bucketEmployees(contact.employees),
+    hasPhone: !!contact.phone,
+    hasPrivacy: true,
+    hasComms: !!contact.comms,
+  };
+}
+
 function buildAcDiagnosisFields(analysis) {
   const priorities = Array.isArray(analysis?.priorities) ? analysis.priorities.slice(0, 3) : [];
   const roadmap = Array.isArray(analysis?.roadmap) ? analysis.roadmap.slice(0, 3) : [];
@@ -792,7 +805,10 @@ async function submitLead(payload, analysis = null) {
   if (/submission failed|_show_error|This field is required|Please select an option/i.test(raw)) {
     throw new Error(`activecampaign_submit_rejected:${raw.slice(0, 280)}`);
   }
-  return raw;
+  return {
+    raw,
+    debug: buildAcDebug(payload),
+  };
 }
 
 async function handleAnalyze(request, env) {
@@ -821,9 +837,18 @@ async function handleAnalyze(request, env) {
   analysis.benchmark = analysis.benchmark || metrics.benchmark;
   analysis.courses = normalizeCourses(payload, analysis);
 
-  const activeCampaignError = await submitLead(payload, analysis).then(() => null).catch(error => error.message);
+  const activeCampaignResult = await submitLead(payload, analysis).catch(error => ({
+    error: error.message,
+    raw: "",
+    debug: buildAcDebug(payload),
+  }));
 
-  return json(200, { ...analysis, activeCampaignError });
+  return json(200, {
+    ...analysis,
+    activeCampaignError: activeCampaignResult?.error || null,
+    activeCampaignRaw: activeCampaignResult?.raw ? String(activeCampaignResult.raw).slice(0, 1200) : "",
+    activeCampaignDebug: activeCampaignResult?.debug || buildAcDebug(payload),
+  });
 }
 
 export default {

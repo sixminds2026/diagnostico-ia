@@ -1,4 +1,4 @@
-name = "sixminds-diagnostico-ia"
+name = "diagnostico-ia"
 main = "_worker.js"
 compatibility_date = "2026-04-23"
 

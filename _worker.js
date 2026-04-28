@@ -21,7 +21,7 @@ const AC_CONFIG = {
 const AC_PRIVACY_LABEL = "Acepto las condiciones de uso y pol\u00edtica de privacidad";
 const AC_COMMS_LABEL = "Acepto recibir de INESDI comunicaciones promocionales de productos y/o actividades de terceras entidades (tanto propias del Grupo Planeta como ajenas).";
 
-// Fill these ActiveCampaign custom field IDs once they exist in the form builder.
+// Fill these Active Campaign custom field IDs once they exist in the form builder.
 // Example: score: "31" means submitLead will send field[31] with the diagnosis score.
 const AC_DIAG_FIELD_MAP = {
   score: "",

@@ -6,3 +6,8 @@ compatibility_date = "2026-04-23"
 directory = "."
 binding = "ASSETS"
 not_found_handling = "single-page-application"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sixminds-diagnostico-db"
+database_id = "01d3f5f7-b773-4e3f-a8f8-f92e710e28bf"

@@ -338,6 +338,330 @@ function json(statusCode, body) {
   });
 }
 
+const ADMIN_EMAIL_FALLBACK = "hello@sixminds.com";
+const ADMIN_PASSWORD_FALLBACK = "Sixminds2024";
+const ADMIN_COOKIE_NAME = "sixminds_admin_session";
+
+function getAdminEmail(env) {
+  return env.ADMIN_EMAIL || ADMIN_EMAIL_FALLBACK;
+}
+
+function getAdminPassword(env) {
+  return env.ADMIN_PASSWORD || ADMIN_PASSWORD_FALLBACK;
+}
+
+function getAdminSecret(env) {
+  return env.ADMIN_SESSION_SECRET || `${getAdminEmail(env)}|${getAdminPassword(env)}|sixminds-admin`;
+}
+
+async function sha256Hex(value) {
+  const data = new TextEncoder().encode(value);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function buildAdminSessionToken(env) {
+  return sha256Hex(`${getAdminEmail(env)}|${getAdminPassword(env)}|${getAdminSecret(env)}`);
+}
+
+function getCookie(request, name) {
+  const cookieHeader = request.headers.get("Cookie") || "";
+  const parts = cookieHeader.split(/;\s*/);
+  for (const part of parts) {
+    const index = part.indexOf("=");
+    if (index === -1) continue;
+    const key = part.slice(0, index);
+    const value = part.slice(index + 1);
+    if (key === name) return value;
+  }
+  return "";
+}
+
+async function isAdminAuthenticated(request, env) {
+  const cookie = getCookie(request, ADMIN_COOKIE_NAME);
+  if (!cookie) return false;
+  const expected = await buildAdminSessionToken(env);
+  return cookie === expected;
+}
+
+function withCookie(response, cookieValue) {
+  const headers = new Headers(response.headers);
+  headers.append("Set-Cookie", cookieValue);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
+function noStoreHtml(body) {
+  return new Response(body, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+async function ensureDb(env) {
+  if (!env.DB) throw new Error("missing_d1_binding");
+  const desiredColumns = ["id", "created_at", "email", "company", "analysis_json"];
+  const tableInfo = await env.DB.prepare("PRAGMA table_info(submissions);").all().catch(() => ({ results: [] }));
+  const existingColumns = (tableInfo.results || []).map(row => row.name);
+  const hasDesiredSchema = desiredColumns.length === existingColumns.length && desiredColumns.every(column => existingColumns.includes(column));
+
+  if (existingColumns.length && !hasDesiredSchema) {
+    await env.DB.exec(`
+      BEGIN TRANSACTION;
+      CREATE TABLE IF NOT EXISTS submissions_v2 (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        email TEXT,
+        company TEXT,
+        analysis_json TEXT NOT NULL
+      );
+      INSERT INTO submissions_v2 (id, created_at, email, company, analysis_json)
+      SELECT
+        id,
+        COALESCE(created_at, CURRENT_TIMESTAMP),
+        COALESCE(email, ''),
+        COALESCE(company, ''),
+        COALESCE(analysis_json, '{}')
+      FROM submissions;
+      DROP TABLE submissions;
+      ALTER TABLE submissions_v2 RENAME TO submissions;
+      CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON submissions(created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_submissions_email ON submissions(email);
+      COMMIT;
+    `);
+    return;
+  }
+
+  await env.DB.exec(`
+    CREATE TABLE IF NOT EXISTS submissions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      email TEXT,
+      company TEXT,
+      analysis_json TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON submissions(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_submissions_email ON submissions(email);
+  `);
+}
+
+async function saveSubmission(env, payload, analysis, activeCampaignResult) {
+  if (!env.DB) return { stored: false, reason: "missing_d1_binding" };
+  await ensureDb(env);
+  const contact = payload.contact || {};
+  await env.DB.prepare(`
+    INSERT INTO submissions (email, company, analysis_json)
+    VALUES (?, ?, ?)
+  `).bind(
+    contact.email || "",
+    contact.company || "",
+    JSON.stringify(analysis)
+  ).run();
+  return { stored: true };
+}
+
+async function listSubmissions(env, limit = 100) {
+  if (!env.DB) throw new Error("missing_d1_binding");
+  await ensureDb(env);
+  const result = await env.DB.prepare(`
+    SELECT id, created_at, email, company, analysis_json
+    FROM submissions
+    ORDER BY datetime(created_at) DESC, id DESC
+    LIMIT ?
+  `).bind(Math.max(1, Math.min(250, Number(limit) || 100))).all();
+  return (result.results || []).map(row => ({
+    ...row,
+    analysis: safeParseJson(row.analysis_json),
+  }));
+}
+
+function safeParseJson(value) {
+  if (!value) return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
+function buildAdminPage() {
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sixminds Admin</title>
+  <style>
+    :root{--g:#75fb92;--bg:#070707;--c1:#0d0f0d;--c2:#111411;--ln:rgba(117,251,146,.18);--w:#fff;--w6:rgba(255,255,255,.78);--r:22px;--f:Inter,system-ui,sans-serif}
+    *{box-sizing:border-box} body{margin:0;font-family:var(--f);background:var(--bg);color:var(--w)}
+    .wrap{max-width:1320px;margin:0 auto;padding:32px 20px 48px}
+    .card{background:linear-gradient(180deg,rgba(117,251,146,.04),rgba(255,255,255,.02));border:1px solid var(--ln);border-radius:var(--r);padding:24px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px}
+    h1,h2,h3{margin:0 0 12px;font-weight:600} p{margin:0;color:var(--w6);line-height:1.6}
+    .grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px}
+    .login{max-width:420px;margin:40px auto}
+    label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--w6);margin:0 0 8px}
+    input{width:100%;padding:14px 16px;border-radius:16px;border:1px solid var(--ln);background:var(--c1);color:var(--w);margin:0 0 14px}
+    button{border:0;border-radius:999px;padding:14px 22px;background:var(--g);color:#000;font-weight:600;cursor:pointer}
+    .ghost{background:transparent;color:var(--w);border:1px solid var(--ln)}
+    .list{display:flex;flex-direction:column;gap:12px;max-height:78vh;overflow:auto;padding-right:4px}
+    .item{padding:16px;border:1px solid var(--ln);border-radius:18px;background:var(--c1);cursor:pointer}
+    .item.active{border-color:var(--g);background:rgba(117,251,146,.08)}
+    .meta{font-size:13px;color:var(--w6);line-height:1.5}
+    .title{font-size:18px;font-weight:600;margin:0 0 6px}
+    .detail{min-height:78vh}
+    .pill{display:inline-flex;padding:6px 10px;border:1px solid var(--ln);border-radius:999px;font-size:12px;color:var(--w6);margin:0 8px 8px 0}
+    .section{margin-top:20px}
+    pre{white-space:pre-wrap;word-break:break-word;background:var(--c1);border:1px solid var(--ln);padding:16px;border-radius:16px;color:var(--w6);font-size:13px;line-height:1.6;overflow:auto}
+    .error{color:#ff8f8f;margin-top:10px}
+    .hidden{display:none}
+    @media(max-width:960px){.grid{grid-template-columns:1fr}.detail{min-height:auto}.list{max-height:none}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="loginView" class="login card">
+      <h1>Sixminds Admin</h1>
+      <p>Accede al historial de diagnósticos generados.</p>
+      <div class="section">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="username" />
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" />
+        <button id="loginBtn">Entrar</button>
+        <div id="loginError" class="error hidden"></div>
+      </div>
+    </div>
+
+    <div id="dashboardView" class="hidden">
+      <div class="top">
+        <div>
+          <h1>Historial de diagnósticos</h1>
+          <p>Consulta todos los submits y las respuestas generadas por la IA.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="ghost" id="refreshBtn">Actualizar</button>
+          <button class="ghost" id="logoutBtn">Cerrar sesión</button>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div id="list" class="list"></div>
+        </div>
+        <div class="card detail">
+          <div id="detailEmpty"><p>Selecciona un diagnóstico para ver el detalle.</p></div>
+          <div id="detail" class="hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const state = { submissions: [], selectedId: null };
+    const $ = id => document.getElementById(id);
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options
+      });
+      const text = await response.text();
+      let json = {};
+      try { json = text ? JSON.parse(text) : {}; } catch {}
+      if (!response.ok) throw new Error(json.error || text || 'Request failed');
+      return json;
+    }
+    function showLogin(error = '') {
+      $('loginView').classList.remove('hidden');
+      $('dashboardView').classList.add('hidden');
+      $('loginError').textContent = error;
+      $('loginError').classList.toggle('hidden', !error);
+    }
+    function showDashboard() {
+      $('loginView').classList.add('hidden');
+      $('dashboardView').classList.remove('hidden');
+    }
+    function renderList() {
+      const list = $('list');
+      list.innerHTML = state.submissions.map(item => {
+        const active = item.id === state.selectedId ? ' active' : '';
+        const score = item.analysis?.score ?? '—';
+        const title = item.company || item.email || 'Sin empresa';
+        const subtitle = item.email || 'Sin email';
+        return '<div class="item' + active + '" data-id="' + item.id + '">' +
+          '<div class="title">' + escapeHtml(title) + '</div>' +
+          '<div class="meta">' + escapeHtml(subtitle) + '</div>' +
+          '<div class="meta" style="margin-top:6px">Score ' + escapeHtml(String(score)) + ' · ' + escapeHtml(item.created_at || '') + '</div>' +
+        '</div>';
+      }).join('');
+      [...list.querySelectorAll('.item')].forEach(el => el.addEventListener('click', () => {
+        state.selectedId = Number(el.dataset.id);
+        renderList();
+        renderDetail();
+      }));
+    }
+    function renderDetail() {
+      const item = state.submissions.find(entry => entry.id === state.selectedId);
+      $('detailEmpty').classList.toggle('hidden', !!item);
+      $('detail').classList.toggle('hidden', !item);
+      if (!item) return;
+      const analysis = item.analysis || {};
+      $('detail').innerHTML =
+        '<h2>' + escapeHtml(item.company || item.email || 'Diagnóstico') + '</h2>' +
+        '<p>' + escapeHtml(item.created_at || '') + '</p>' +
+        '<div class="section">' +
+          '<span class="pill">Email: ' + escapeHtml(item.email || '—') + '</span>' +
+          '<span class="pill">Empresa: ' + escapeHtml(item.company || '—') + '</span>' +
+          '<span class="pill">Score: ' + escapeHtml(String(analysis.score ?? '—')) + '</span>' +
+        '</div>' +
+        '<div class="section"><h3>Headline</h3><p>' + escapeHtml(analysis.headline || '—') + '</p></div>' +
+        '<div class="section"><h3>Summary</h3><p>' + escapeHtml(analysis.summary || '—') + '</p></div>' +
+        '<div class="section"><h3>Respuesta IA</h3><pre>' + escapeHtml(JSON.stringify(item.analysis, null, 2)) + '</pre></div>';
+    }
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>\"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;' }[m]));
+    }
+    async function checkSession() {
+      try {
+        const data = await api('/api/admin/session');
+        if (!data.authenticated) return showLogin();
+        showDashboard();
+        await loadSubmissions();
+      } catch {
+        showLogin();
+      }
+    }
+    async function loadSubmissions() {
+      const data = await api('/api/admin/submissions');
+      state.submissions = data.submissions || [];
+      state.selectedId = state.submissions[0]?.id || null;
+      renderList();
+      renderDetail();
+    }
+    $('loginBtn').addEventListener('click', async () => {
+      try {
+        await api('/api/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: $('email').value.trim(), password: $('password').value })
+        });
+        showDashboard();
+        await loadSubmissions();
+      } catch (error) {
+        showLogin(error.message || 'Login incorrecto');
+      }
+    });
+    $('refreshBtn').addEventListener('click', loadSubmissions);
+    $('logoutBtn').addEventListener('click', async () => {
+      await api('/api/admin/logout', { method: 'POST' });
+      showLogin();
+    });
+    checkSession();
+  </script>
+</body>
+</html>`;
+}
+
 function calcMetrics(payload) {
   const a = payload.answers || {};
   const chips = payload.chips || {};
@@ -843,12 +1167,67 @@ async function handleAnalyze(request, env) {
     debug: buildAcDebug(payload),
   }));
 
+  const storageResult = await saveSubmission(env, payload, analysis, activeCampaignResult).catch(error => ({
+    stored: false,
+    reason: error.message,
+  }));
+
   return json(200, {
     ...analysis,
     activeCampaignError: activeCampaignResult?.error || null,
     activeCampaignRaw: activeCampaignResult?.raw ? String(activeCampaignResult.raw).slice(0, 1200) : "",
     activeCampaignDebug: activeCampaignResult?.debug || buildAcDebug(payload),
+    storageStatus: storageResult,
   });
+}
+
+async function handleAdminPage() {
+  return noStoreHtml(buildAdminPage());
+}
+
+async function handleAdminSession(request, env) {
+  const authenticated = await isAdminAuthenticated(request, env);
+  return json(200, { authenticated });
+}
+
+async function handleAdminLogin(request, env) {
+  if (request.method !== "POST") return json(405, { error: "Method not allowed" });
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json(400, { error: "Invalid JSON" });
+  }
+  const email = String(body?.email || "").trim().toLowerCase();
+  const password = String(body?.password || "");
+  if (email !== getAdminEmail(env).toLowerCase() || password !== getAdminPassword(env)) {
+    return json(401, { error: "Credenciales incorrectas" });
+  }
+  const token = await buildAdminSessionToken(env);
+  const response = json(200, { ok: true });
+  return withCookie(
+    response,
+    `${ADMIN_COOKIE_NAME}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`
+  );
+}
+
+async function handleAdminLogout() {
+  const response = json(200, { ok: true });
+  return withCookie(
+    response,
+    `${ADMIN_COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`
+  );
+}
+
+async function handleAdminSubmissions(request, env) {
+  const authenticated = await isAdminAuthenticated(request, env);
+  if (!authenticated) return json(401, { error: "Unauthorized" });
+  try {
+    const submissions = await listSubmissions(env, 150);
+    return json(200, { submissions });
+  } catch (error) {
+    return json(500, { error: error.message || "admin_storage_error" });
+  }
 }
 
 export default {
@@ -856,6 +1235,21 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/analyze" || url.pathname === "/analyze/") {
       return handleAnalyze(request, env);
+    }
+    if (url.pathname === "/admin" || url.pathname === "/admin/") {
+      return handleAdminPage(request, env);
+    }
+    if (url.pathname === "/api/admin/session") {
+      return handleAdminSession(request, env);
+    }
+    if (url.pathname === "/api/admin/login") {
+      return handleAdminLogin(request, env);
+    }
+    if (url.pathname === "/api/admin/logout") {
+      return handleAdminLogout(request, env);
+    }
+    if (url.pathname === "/api/admin/submissions") {
+      return handleAdminSubmissions(request, env);
     }
 
     return env.ASSETS.fetch(request);

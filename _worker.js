@@ -514,10 +514,18 @@ function buildAdminPage() {
     .detail{min-height:78vh}
     .pill{display:inline-flex;padding:6px 10px;border:1px solid var(--ln);border-radius:999px;font-size:12px;color:var(--w6);margin:0 8px 8px 0}
     .section{margin-top:20px}
+    .detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .mini{padding:16px;border:1px solid var(--ln);border-radius:18px;background:var(--c1)}
+    .mini h4{margin:0 0 8px;font-size:15px;font-weight:600;color:var(--w)}
+    .mini p{font-size:14px}
+    .stack{display:flex;flex-direction:column;gap:12px}
+    .list-clean{margin:0;padding-left:20px;color:var(--w6);line-height:1.65}
+    .list-clean li+li{margin-top:6px}
+    .kicker{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--g);margin:0 0 8px}
     pre{white-space:pre-wrap;word-break:break-word;background:var(--c1);border:1px solid var(--ln);padding:16px;border-radius:16px;color:var(--w6);font-size:13px;line-height:1.6;overflow:auto}
     .error{color:#ff8f8f;margin-top:10px}
     .hidden{display:none}
-    @media(max-width:960px){.grid{grid-template-columns:1fr}.detail{min-height:auto}.list{max-height:none}}
+    @media(max-width:960px){.grid{grid-template-columns:1fr}.detail{min-height:auto}.list{max-height:none}.detail-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -607,6 +615,10 @@ function buildAdminPage() {
       $('detail').classList.toggle('hidden', !item);
       if (!item) return;
       const analysis = item.analysis || {};
+      const bestMove = analysis.best_first_move || {};
+      const priorities = Array.isArray(analysis.priorities) ? analysis.priorities : [];
+      const roadmap = Array.isArray(analysis.roadmap) ? analysis.roadmap : [];
+      const courses = Array.isArray(analysis.courses) ? analysis.courses : [];
       $('detail').innerHTML =
         '<h2>' + escapeHtml(item.company || item.email || 'Diagnóstico') + '</h2>' +
         '<p>' + escapeHtml(item.created_at || '') + '</p>' +
@@ -614,10 +626,62 @@ function buildAdminPage() {
           '<span class="pill">Email: ' + escapeHtml(item.email || '—') + '</span>' +
           '<span class="pill">Empresa: ' + escapeHtml(item.company || '—') + '</span>' +
           '<span class="pill">Score: ' + escapeHtml(String(analysis.score ?? '—')) + '</span>' +
+          '<span class="pill">Benchmark: ' + escapeHtml(analysis.benchmark || '—') + '</span>' +
         '</div>' +
-        '<div class="section"><h3>Headline</h3><p>' + escapeHtml(analysis.headline || '—') + '</p></div>' +
-        '<div class="section"><h3>Summary</h3><p>' + escapeHtml(analysis.summary || '—') + '</p></div>' +
-        '<div class="section"><h3>Respuesta IA</h3><pre>' + escapeHtml(JSON.stringify(item.analysis, null, 2)) + '</pre></div>';
+        '<div class="section mini">' +
+          '<div class="kicker">Resumen ejecutivo</div>' +
+          '<h3>' + escapeHtml(analysis.headline || '—') + '</h3>' +
+          '<p>' + escapeHtml(analysis.summary || '—') + '</p>' +
+        '</div>' +
+        '<div class="section mini">' +
+          '<div class="kicker">Mejor primer movimiento</div>' +
+          '<h3>' + escapeHtml(bestMove.title || '—') + '</h3>' +
+          '<p><strong>Proceso:</strong> ' + escapeHtml(bestMove.process || '—') + '</p>' +
+          '<p><strong>Por qué ahora:</strong> ' + escapeHtml(bestMove.why || '—') + '</p>' +
+          '<p><strong>Primera acción:</strong> ' + escapeHtml(bestMove.first_action || '—') + '</p>' +
+          '<p><strong>Efecto esperado:</strong> ' + escapeHtml(bestMove.expected_effect || '—') + '</p>' +
+        '</div>' +
+        '<div class="section">' +
+          '<div class="kicker">Prioridades</div>' +
+          '<div class="detail-grid">' + priorities.map((priority, index) =>
+            '<div class="mini">' +
+              '<h4>' + escapeHtml('Prioridad ' + (index + 1) + ' · ' + (priority.title || '—')) + '</h4>' +
+              '<p>' + escapeHtml(priority.body || '—') + '</p>' +
+              '<ul class="list-clean">' +
+                '<li><strong>Impacto:</strong> ' + escapeHtml(priority.impact || '—') + '</li>' +
+                '<li><strong>Horizonte:</strong> ' + escapeHtml(priority.horizon || '—') + '</li>' +
+                '<li><strong>Proceso:</strong> ' + escapeHtml(priority.concrete_process || '—') + '</li>' +
+                '<li><strong>Intervención inicial:</strong> ' + escapeHtml(priority.first_intervention || '—') + '</li>' +
+                '<li><strong>Efecto:</strong> ' + escapeHtml(priority.business_effect || '—') + '</li>' +
+              '</ul>' +
+            '</div>'
+          ).join('') + '</div>' +
+        '</div>' +
+        '<div class="section">' +
+          '<div class="kicker">Roadmap 30 / 60 / 90</div>' +
+          '<div class="stack">' + roadmap.map(phase =>
+            '<div class="mini">' +
+              '<h4>' + escapeHtml((phase.phase || '—') + ' · ' + (phase.title || '—')) + '</h4>' +
+              buildBulletList(phase.actions) +
+            '</div>'
+          ).join('') + '</div>' +
+        '</div>' +
+        '<div class="section">' +
+          '<div class="kicker">Formaciones recomendadas</div>' +
+          (courses.length
+            ? '<div class="stack">' + courses.map(course =>
+                '<div class="mini">' +
+                  '<h4>' + escapeHtml(course.name || '—') + '</h4>' +
+                  '<p>' + escapeHtml(course.reason || '—') + '</p>' +
+                '</div>'
+              ).join('') + '</div>'
+            : '<div class="mini"><p>No hay formaciones recomendadas en este diagnóstico.</p></div>') +
+        '</div>' +
+        '<div class="section"><h3>JSON completo</h3><pre>' + escapeHtml(JSON.stringify(item.analysis, null, 2)) + '</pre></div>';
+    }
+    function buildBulletList(items) {
+      if (!Array.isArray(items) || !items.length) return '<p>—</p>';
+      return '<ul class="list-clean">' + items.map(item => '<li>' + escapeHtml(item) + '</li>').join('') + '</ul>';
     }
     function escapeHtml(value) {
       return String(value ?? '').replace(/[&<>\"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;' }[m]));

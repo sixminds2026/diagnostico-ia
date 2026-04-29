@@ -21,7 +21,7 @@ const AC_CONFIG = {
 const AC_PRIVACY_LABEL = "Acepto las condiciones de uso y pol\u00edtica de privacidad";
 const AC_COMMS_LABEL = "Acepto recibir de INESDI comunicaciones promocionales de productos y/o actividades de terceras entidades (tanto propias del Grupo Planeta como ajenas).";
 
-// Fill these Active Campaign custom field IDs once they exist in the form builder.
+// Fill these ActiveCampaign custom field IDs once they exist in the form builder.
 // Example: score: "31" means submitLead will send field[31] with the diagnosis score.
 const AC_DIAG_FIELD_MAP = {
   score: "",
@@ -408,15 +408,16 @@ async function ensureDb(env) {
   const hasDesiredSchema = desiredColumns.length === existingColumns.length && desiredColumns.every(column => existingColumns.includes(column));
 
   if (existingColumns.length && !hasDesiredSchema) {
-    await env.DB.exec(`
-      BEGIN TRANSACTION;
+    await env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS submissions_v2 (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         email TEXT,
         company TEXT,
         analysis_json TEXT NOT NULL
-      );
+      )
+    `).run();
+    await env.DB.prepare(`
       INSERT INTO submissions_v2 (id, created_at, email, company, analysis_json)
       SELECT
         id,
@@ -424,27 +425,26 @@ async function ensureDb(env) {
         COALESCE(email, ''),
         COALESCE(company, ''),
         COALESCE(analysis_json, '{}')
-      FROM submissions;
-      DROP TABLE submissions;
-      ALTER TABLE submissions_v2 RENAME TO submissions;
-      CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON submissions(created_at DESC);
-      CREATE INDEX IF NOT EXISTS idx_submissions_email ON submissions(email);
-      COMMIT;
-    `);
+      FROM submissions
+    `).run();
+    await env.DB.prepare("DROP TABLE submissions").run();
+    await env.DB.prepare("ALTER TABLE submissions_v2 RENAME TO submissions").run();
+    await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON submissions(created_at DESC)").run();
+    await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_submissions_email ON submissions(email)").run();
     return;
   }
 
-  await env.DB.exec(`
+  await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS submissions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       email TEXT,
       company TEXT,
       analysis_json TEXT NOT NULL
-    );
-    CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON submissions(created_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_submissions_email ON submissions(email);
-  `);
+    )
+  `).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON submissions(created_at DESC)").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_submissions_email ON submissions(email)").run();
 }
 
 async function saveSubmission(env, payload, analysis, activeCampaignResult) {
